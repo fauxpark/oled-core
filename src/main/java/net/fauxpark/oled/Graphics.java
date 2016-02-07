@@ -7,7 +7,7 @@ import net.fauxpark.oled.font.Font;
  *
  * @author fauxpark
  */
-public class Display {
+public class Graphics {
 	/**
 	 * The SSD1306 OLED display.
 	 */
@@ -16,13 +16,14 @@ public class Display {
 	/**
 	 * Display constructor.
 	 *
+	 * @param ssd1306 The SSD1306 object to use.
 	 * @param width The width of the display in pixels.
 	 * @param height The height of the display in pixels.
 	 * @param channel The SPI channel to use.
 	 * @param rstPin The GPIO pin to use for the RST line.
 	 * @param dcPin The GPIO pin to use for the D/C line.
 	 */
-	public Display(SSD1306 ssd1306) {
+	public Graphics(SSD1306 ssd1306) {
 		this.ssd1306 = ssd1306;
 		ssd1306.startup(false);
 	}
