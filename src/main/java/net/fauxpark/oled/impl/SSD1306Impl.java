@@ -81,7 +81,7 @@ public class SSD1306Impl extends SSD1306 {
 	public void shutdown() {
 		clear();
 		display();
-		command(Command.DISPLAY_OFF);
+		setDisplayState(false);
 		reset();
 		gpio.shutdown();
 	}

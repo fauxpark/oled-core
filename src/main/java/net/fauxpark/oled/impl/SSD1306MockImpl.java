@@ -26,21 +26,26 @@ public class SSD1306MockImpl extends SSD1306 {
 
 	@Override
 	public void startup(boolean externalVcc) {
+		reset();
 		setInverted(false);
 		setDisplayState(true);
 		clear();
+		display();
 	}
 
 	@Override
 	public void shutdown() {
 		clear();
+		display();
+		setDisplayState(false);
+		reset();
 	}
 
 	@Override
 	public void reset() {}
 
 	@Override
-	public void display() {}
+	public synchronized void display() {}
 
 	@Override
 	public void scrollHorizontally(boolean direction, int start, int end, int step) {}

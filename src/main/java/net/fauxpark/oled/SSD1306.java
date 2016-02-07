@@ -291,7 +291,6 @@ public abstract class SSD1306 {
 		this.buffer = buffer;
 	}
 
-
 	/**
 	 * Send a command over SPI.
 	 *

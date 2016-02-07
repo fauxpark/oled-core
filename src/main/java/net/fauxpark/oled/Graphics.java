@@ -25,7 +25,6 @@ public class Graphics {
 	 */
 	public Graphics(SSD1306 ssd1306) {
 		this.ssd1306 = ssd1306;
-		ssd1306.startup(false);
 	}
 
 	/**
@@ -33,7 +32,7 @@ public class Graphics {
 	 *
 	 * @param x The X position to start drawing at.
 	 * @param y The Y position to start drawing at.
-	 * @param font The font to use
+	 * @param font The font to use.
 	 * @param text The text to draw.
 	 */
 	public void text(int x, int y, Font font, String text) {
