@@ -1,4 +1,4 @@
-# SSD1306 in Java
+# oled-core: SSD1306 in Java
 This is a driver for the [Adafruit SSD1306 OLED display](https://www.adafruit.com/categories/98) on the Raspberry Pi, written (almost) completely in Java.
 It makes use of the [Pi4J](https://github.com/Pi4J/pi4j) library, which does all the fiddly bits in native code to
 operate the GPIO pins and drive the SPI interface.
