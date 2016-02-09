@@ -72,9 +72,9 @@ graphics.text(20, 20, new CodePage1252(), "Hello world!");
 As you can see above, this library can draw text onto the screen. It is also possible to change the character set.
 
 Currently three character sets are supported:
-- **CP437** (from the IBM PC)
-- **CP850** (MS-DOS, also used in the Windows Command Prompt)
-- **Windows-1252** (the first 256 codepoints of Unicode; use this for the closest mapping between entered text and display output)
+- [**CP437**](https://en.wikipedia.org/wiki/Code_page_437) (from the IBM PC)
+- [**CP850**](https://en.wikipedia.org/wiki/Code_page_850) (MS-DOS, also used in the Windows Command Prompt)
+- [**Windows-1252**](https://en.wikipedia.org/wiki/Windows-1252) (the first 256 codepoints of Unicode; use this for the closest mapping between entered text and display output)
 
 In addition, it is possible to create your own character sets by implementing `Font` and specifying the number of rows and columns,
 and the array of glyph data. Refer to the `Font` JavaDoc for an explanation on how the glyphs are encoded.
