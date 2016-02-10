@@ -247,7 +247,7 @@ public abstract class SSD1306 {
 			return false;
 		}
 
-		return (buffer[x + (y / 8) * width] | (1 << (y & 7))) == 1;
+		return (buffer[x + (y / 8) * width] & (1 << (y & 7))) != 0;
 	}
 
 	/**
