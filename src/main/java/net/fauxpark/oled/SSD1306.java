@@ -1,7 +1,7 @@
 package net.fauxpark.oled;
 
 /**
- * An interface for defining implementations of the SSD1306 OLED display.
+ * A base class for defining implementations of the SSD1306 OLED display.
  *
  * @author fauxpark
  */
@@ -29,27 +29,27 @@ public abstract class SSD1306 {
 	/**
 	 * Indicates whether the display is on or off.
 	 */
-	protected boolean displayState;
+	private boolean displayOn;
 
 	/**
 	 * Indicates whether the display is inverted.
 	 */
-	protected boolean inverted;
+	private boolean inverted;
 
 	/**
 	 * Indicates whether the display is horizontally flipped.
 	 */
-	protected boolean hFlipped;
+	private boolean hFlipped;
 
 	/**
 	 * Indicates whether the display is vertically flipped.
 	 */
-	protected boolean vFlipped;
+	private boolean vFlipped;
 
 	/**
-	 * The current contrast of the display.
+	 * The current contrast level of the display.
 	 */
-	protected int contrast;
+	private int contrast;
 
 	/**
 	 * SSD1306 constructor.
@@ -118,17 +118,17 @@ public abstract class SSD1306 {
 	 *
 	 * @return True if the display is on.
 	 */
-	public boolean getDisplayState() {
-		return displayState;
+	public boolean isDisplayOn() {
+		return displayOn;
 	}
 
 	/**
 	 * Turn the display on or off.
 	 *
-	 * @param displayState Whether to turn the display on.
+	 * @param displayOn Whether to turn the display on.
 	 */
-	public void setDisplayState(boolean displayState) {
-		this.displayState = displayState;
+	public void setDisplayOn(boolean displayOn) {
+		this.displayOn = displayOn;
 	}
 
 	/**
@@ -136,7 +136,7 @@ public abstract class SSD1306 {
 	 *
 	 * @return Whether the display is inverted or not.
 	 */
-	public boolean getInverted() {
+	public boolean isInverted() {
 		return inverted;
 	}
 
@@ -153,7 +153,7 @@ public abstract class SSD1306 {
 	/**
 	 * Get the display contrast.
 	 *
-	 * @return The current contrast setting of the display.
+	 * @return The current contrast level of the display.
 	 */
 	public int getContrast() {
 		return contrast;
@@ -194,6 +194,11 @@ public abstract class SSD1306 {
 	public abstract void scrollDiagonally(boolean direction, int start, int end, int step);
 
 	/**
+	 * Start scrolling the display.
+	 */
+	public abstract void startScroll();
+
+	/**
 	 * Stop scrolling the display.
 	 */
 	public abstract void stopScroll();
@@ -203,17 +208,17 @@ public abstract class SSD1306 {
 	 *
 	 * @return Whether the display is horizontally flipped.
 	 */
-	public boolean getHFlipped() {
+	public boolean isHFlipped() {
 		return hFlipped;
 	}
 
 	/**
 	 * Flip the display horizontally.
 	 *
-	 * @param flip Whether to flip the display or return to normal.
+	 * @param hFlipped Whether to flip the display or return to normal.
 	 */
-	public void horizontalFlip(boolean flip) {
-		this.hFlipped = flip;
+	public void setHFlipped(boolean hFlipped) {
+		this.hFlipped = hFlipped;
 	}
 
 	/**
@@ -221,17 +226,17 @@ public abstract class SSD1306 {
 	 *
 	 * @return Whether the display is vertically flipped.
 	 */
-	public boolean getVFlipped() {
+	public boolean isVFlipped() {
 		return vFlipped;
 	}
 
 	/**
 	 * Flip the display vertically.
 	 *
-	 * @param flip Whether to flip the display or return to normal.
+	 * @param vFlipped Whether to flip the display or return to normal.
 	 */
-	public void verticalFlip(boolean flip) {
-		this.vFlipped = flip;
+	public void setVFlipped(boolean vFlipped) {
+		this.vFlipped = vFlipped;
 	}
 
 	/**

@@ -11,12 +11,6 @@ package net.fauxpark.oled.font;
  */
 public interface Font {
 	/**
-	 * Get the font name.
-	 *
-	 * @return The font name, in the format "{name}-{columns}x{rows}".
-	 */
-	public String getName();
-	/**
 	 * Get the number of columns in the font.
 	 *
 	 * @return The font's column count.

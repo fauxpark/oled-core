@@ -41,11 +41,6 @@ public class SSD1306Impl extends SSD1306 {
 	private SpiDevice spi;
 
 	/**
-	 * Indicates whether the display is being powered externally.
-	 */
-	private boolean externalVcc;
-
-	/**
 	 * SSD1306Impl constructor.
 	 *
 	 * @param width The width of the display in pixels.
@@ -56,7 +51,6 @@ public class SSD1306Impl extends SSD1306 {
 	 */
 	public SSD1306Impl(int width, int height, SpiChannel channel, Pin rstPin, Pin dcPin) {
 		super(width, height);
-
 		gpio = GpioFactory.getInstance();
 		this.rstPin = gpio.provisionDigitalOutputPin(rstPin);
 		this.dcPin = gpio.provisionDigitalOutputPin(dcPin);
@@ -70,9 +64,23 @@ public class SSD1306Impl extends SSD1306 {
 
 	@Override
 	public void startup(boolean externalVcc) {
-		this.externalVcc = externalVcc;
 		reset();
-		setup();
+		setDisplayOn(false);
+		command(Command.SET_DISPLAY_CLOCK_DIV, width);
+		command(Command.SET_MULTIPLEX_RATIO, width - 1);
+		command(Command.SET_DISPLAY_OFFSET, 0);
+		command(Command.SET_START_LINE_40);
+		command(Command.SET_CHARGE_PUMP, externalVcc ? Constant.CHARGE_PUMP_DISABLE : Constant.CHARGE_PUMP_ENABLE);
+		command(Command.SET_MEMORY_MODE, Constant.MEMORY_MODE_HORIZONTAL);
+		command(Command.SET_SEGMENT_REMAP_REVERSE);
+		command(Command.SET_COM_SCAN_DEC);
+		command(Command.SET_COM_PINS, height == 64 ? 0x12 : 0x02);
+		setContrast(externalVcc ? 0x9F : 0xCF);
+		command(Command.SET_PRECHARGE_PERIOD, externalVcc ? 0x22 : 0xF1);
+		command(Command.SET_VCOM_DESELECT, 0x40);
+		command(Command.DISPLAY_ALL_ON_RESUME);
+		setInverted(false);
+		setDisplayOn(true);
 		clear();
 		display();
 	}
@@ -81,7 +89,7 @@ public class SSD1306Impl extends SSD1306 {
 	public void shutdown() {
 		clear();
 		display();
-		setDisplayState(false);
+		setDisplayOn(false);
 		reset();
 		gpio.shutdown();
 	}
@@ -99,28 +107,6 @@ public class SSD1306Impl extends SSD1306 {
 		}
 	}
 
-	/**
-	 * Initialise the display.
-	 */
-	private void setup() {
-		setDisplayState(false);
-		command(Command.SET_DISPLAY_CLOCK_DIV, width);
-		command(Command.SET_MULTIPLEX_RATIO, width - 1);
-		command(Command.SET_DISPLAY_OFFSET, 0);
-		command(Command.SET_START_LINE_40);
-		command(Command.SET_CHARGE_PUMP, externalVcc ? Constant.CHARGE_PUMP_DISABLE : Constant.CHARGE_PUMP_ENABLE);
-		command(Command.SET_MEMORY_MODE, Constant.MEMORY_MODE_HORIZONTAL);
-		command(Command.SET_SEGMENT_REMAP_REVERSE);
-		command(Command.SET_COM_SCAN_DEC);
-		command(Command.SET_COM_PINS, height == 64 ? 0x12 : 0x02);
-		setContrast(externalVcc ? 0x9F : 0xCF);
-		command(Command.SET_PRECHARGE_PERIOD, externalVcc ? 0x22 : 0xF1);
-		command(Command.SET_VCOM_DESELECT, 0x40);
-		command(Command.DISPLAY_ALL_ON_RESUME);
-		setInverted(false);
-		setDisplayState(true);
-	}
-
 	@Override
 	public synchronized void display() {
 		command(Command.SET_COLUMN_ADDRESS, 0, width - 1);
@@ -129,14 +115,14 @@ public class SSD1306Impl extends SSD1306 {
 	}
 
 	@Override
-	public void setDisplayState(boolean on) {
-		if(on) {
+	public void setDisplayOn(boolean displayOn) {
+		if(displayOn) {
 			command(Command.DISPLAY_ON);
 		} else {
 			command(Command.DISPLAY_OFF);
 		}
 
-		super.setDisplayState(on);
+		super.setDisplayOn(displayOn);
 	}
 
 	@Override
@@ -156,21 +142,21 @@ public class SSD1306Impl extends SSD1306 {
 	}
 
 	@Override
-	public void horizontalFlip(boolean flip) {
+	public void setHFlipped(boolean hFlipped) {
 		// TODO
 
-		if(flip) {
+		if(hFlipped) {
 
 		} else {
 
 		}
 
-		super.horizontalFlip(flip);
+		super.setHFlipped(hFlipped);
 	}
 
 	@Override
-	public void verticalFlip(boolean flip) {
-		if(flip) {
+	public void setVFlipped(boolean vFlipped) {
+		if(vFlipped) {
 			command(Command.SET_COM_SCAN_INC);
 			command(Command.SET_SEGMENT_REMAP);
 		} else {
@@ -178,19 +164,22 @@ public class SSD1306Impl extends SSD1306 {
 			command(Command.SET_COM_PINS, 0x02);
 		}
 
-		super.verticalFlip(flip);
+		super.setVFlipped(vFlipped);
 	}
 
 	@Override
 	public void scrollHorizontally(boolean direction, int start, int end, int step) {
 		command(direction ? Command.LEFT_HORIZONTAL_SCROLL : Command.RIGHT_HORIZONTAL_SCROLL, Constant.DUMMY_BYTE_00, start, step, end, 0x01, Constant.DUMMY_BYTE_FF);
-		command(Command.ACTIVATE_SCROLL);
 	}
 
 	@Override
 	public void scrollDiagonally(boolean direction, int start, int end, int step) {
 		command(Command.SET_VERTICAL_SCROLL_AREA, 0, height);
 		command(direction ? Command.VERTICAL_AND_LEFT_HORIZONTAL_SCROLL : Command.VERTICAL_AND_RIGHT_HORIZONTAL_SCROLL, Constant.DUMMY_BYTE_00, start, step, end, 0x01);
+	}
+
+	@Override
+	public void startScroll() {
 		command(Command.ACTIVATE_SCROLL);
 	}
 

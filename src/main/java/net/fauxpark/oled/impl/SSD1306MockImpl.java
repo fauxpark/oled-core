@@ -28,7 +28,7 @@ public class SSD1306MockImpl extends SSD1306 {
 	public void startup(boolean externalVcc) {
 		reset();
 		setInverted(false);
-		setDisplayState(true);
+		setDisplayOn(true);
 		clear();
 		display();
 	}
@@ -37,7 +37,7 @@ public class SSD1306MockImpl extends SSD1306 {
 	public void shutdown() {
 		clear();
 		display();
-		setDisplayState(false);
+		setDisplayOn(false);
 		reset();
 	}
 
@@ -52,6 +52,9 @@ public class SSD1306MockImpl extends SSD1306 {
 
 	@Override
 	public void scrollDiagonally(boolean direction, int start, int end, int step) {}
+
+	@Override
+	public void startScroll() {}
 
 	@Override
 	public void stopScroll() {}

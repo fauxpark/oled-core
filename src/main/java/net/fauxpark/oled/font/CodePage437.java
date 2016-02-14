@@ -280,11 +280,6 @@ public class CodePage437 implements Font {
 	};
 
 	@Override
-	public String getName() {
-		return String.format("{0}-{1}x{2}", getClass().getSimpleName(), columns, rows);
-	}
-
-	@Override
 	public int getColumns() {
 		return columns;
 	}
@@ -297,5 +292,10 @@ public class CodePage437 implements Font {
 	@Override
 	public int[] getGlyphs() {
 		return glyphs;
+	}
+
+	@Override
+	public String toString() {
+		return String.format("{0}-{1}x{2}", getClass().getSimpleName(), columns, rows);
 	}
 }

@@ -3,7 +3,7 @@
 	<description>SSD1306 Driver Core</description>
 	<groupId>net.fauxpark</groupId>
 	<artifactId>oled-core</artifactId>
-	<version>1.0</version>
+	<version>1.1</version>
 	<modelVersion>4.0.0</modelVersion>
 	<url>https://github.com/fauxpark/oled-core</url>
 	<packaging>jar</packaging>
