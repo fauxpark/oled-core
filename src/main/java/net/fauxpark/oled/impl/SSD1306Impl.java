@@ -83,6 +83,7 @@ public class SSD1306Impl extends SSD1306 {
 		setDisplayOn(true);
 		clear();
 		display();
+		super.startup(externalVcc);
 	}
 
 	@Override
@@ -92,6 +93,7 @@ public class SSD1306Impl extends SSD1306 {
 		setDisplayOn(false);
 		reset();
 		gpio.shutdown();
+		super.shutdown();
 	}
 
 	@Override

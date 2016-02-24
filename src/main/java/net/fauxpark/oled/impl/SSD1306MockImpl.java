@@ -31,6 +31,7 @@ public class SSD1306MockImpl extends SSD1306 {
 		setDisplayOn(true);
 		clear();
 		display();
+		super.startup(externalVcc);
 	}
 
 	@Override
@@ -39,6 +40,7 @@ public class SSD1306MockImpl extends SSD1306 {
 		display();
 		setDisplayOn(false);
 		reset();
+		super.shutdown();
 	}
 
 	@Override

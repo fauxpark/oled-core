@@ -27,6 +27,11 @@ public abstract class SSD1306 {
 	protected byte[] buffer;
 
 	/**
+	 * Indicates whether the display has been started up.
+	 */
+	private boolean initialised;
+
+	/**
 	 * Indicates whether the display is on or off.
 	 */
 	private boolean displayOn;
@@ -65,16 +70,27 @@ public abstract class SSD1306 {
 	}
 
 	/**
+	 * Get the initialised state of the display.
+	 */
+	public boolean isInitialised() {
+		return initialised;
+	}
+
+	/**
 	 * Start the power on procedure for the display.
 	 *
 	 * @param externalVcc Indicates whether the display is being driven by an external power source.
 	 */
-	public abstract void startup(boolean externalVcc);
+	public void startup(boolean externalVcc) {
+		initialised = true;
+	}
 
 	/**
 	 * Start the power off procedure for the display.
 	 */
-	public abstract void shutdown();
+	public void shutdown() {
+		initialised = false;
+	}
 
 	/**
 	 * Reset the display.
