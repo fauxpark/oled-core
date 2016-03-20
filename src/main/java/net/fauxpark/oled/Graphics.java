@@ -17,11 +17,6 @@ public class Graphics {
 	 * Display constructor.
 	 *
 	 * @param ssd1306 The SSD1306 object to use.
-	 * @param width The width of the display in pixels.
-	 * @param height The height of the display in pixels.
-	 * @param channel The SPI channel to use.
-	 * @param rstPin The GPIO pin to use for the RST line.
-	 * @param dcPin The GPIO pin to use for the D/C line.
 	 */
 	public Graphics(SSD1306 ssd1306) {
 		this.ssd1306 = ssd1306;
@@ -41,7 +36,7 @@ public class Graphics {
 		int[] glyphs = font.getGlyphs();
 
 		for(int i = 0; i < text.length(); i++) {
-			char c = text.charAt(i);
+			byte c = (byte) text.charAt(i);
 			int p = c * cols;
 
 			for(int col = 0; col < cols; col++) {
@@ -168,6 +163,7 @@ public class Graphics {
 
 	/**
 	 * Draw a circle.
+	 * This is the same as calling arc() with a start and end angle of 0 and 360 respectively.
 	 *
 	 * @param x The X position of the center of the circle.
 	 * @param y The Y position of the center of the circle.

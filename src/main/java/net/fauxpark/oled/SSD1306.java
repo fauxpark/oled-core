@@ -264,7 +264,7 @@ public abstract class SSD1306 {
 	 * @return False if the pixel is "off" or the given coordinates are out of bounds, true if the pixel is "on".
 	 */
 	public boolean getPixel(int x, int y) {
-		if(x < 0 || x > width || y < 0 || y > height) {
+		if(x < 0 || x >= width || y < 0 || y >= height) {
 			return false;
 		}
 
@@ -281,7 +281,7 @@ public abstract class SSD1306 {
 	 * @return False if the given coordinates are out of bounds.
 	 */
 	public boolean setPixel(int x, int y, boolean on) {
-		if(x < 0 || x > width || y < 0 || y > height) {
+		if(x < 0 || x >= width || y < 0 || y >= height) {
 			return false;
 		}
 
