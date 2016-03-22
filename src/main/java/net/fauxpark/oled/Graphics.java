@@ -68,8 +68,8 @@ public class Graphics {
 	 * @param y1 The Y position of the second point.
 	 */
 	public void line(int x0, int y0, int x1, int y1) {
-		int dx = (x1 - x0);
-		int dy = (y1 - y0);
+		int dx = x1 - x0;
+		int dy = y1 - y0;
 
 		if(dx == 0 && dy == 0) {
 			ssd1306.setPixel(x0, y0, true);
@@ -78,14 +78,14 @@ public class Graphics {
 		}
 
 		if(dx == 0) {
-			for(int y = Math.min(y0,  y1); y <= Math.max(y1, y0); y++) {
+			for(int y = Math.min(y0, y1); y <= Math.max(y1, y0); y++) {
 				ssd1306.setPixel(x0, y, true);
 			}
 		} else if(dy == 0) {
 			for(int x = Math.min(x0, x1); x <= Math.max(x1, x0); x++) {
 				ssd1306.setPixel(x, y0, true);
 			}
-		} else if(Math.abs(dx) > Math.abs(dy)) {
+		} else if(Math.abs(dx) >= Math.abs(dy)) {
 			if(dx < 0) {
 				int ox = x0;
 				int oy = y0;
@@ -93,14 +93,14 @@ public class Graphics {
 				y0 = y1;
 				x1 = ox;
 				y1 = oy;
-				dx = (x1 - x0);
-				dx = (y1 - y0);
+				dx = x1 - x0;
+				dy = y1 - y0;
 			}
 
 			double coeff = (double) dy / (double) dx;
 
 			for(int x = 0; x <= dx; x++) {
-				ssd1306.setPixel(x + x0, y0 + (int) Math.round(x + coeff), true);
+				ssd1306.setPixel(x + x0, y0 + (int) Math.round(x * coeff), true);
 			}
 		} else if(Math.abs(dx) < Math.abs(dy)) {
 			if(dy < 0) {
@@ -110,14 +110,14 @@ public class Graphics {
 				y0 = y1;
 				x1 = ox;
 				y1 = oy;
-				dx = (x1 - x0);
-				dx = (y1 - y0);
+				dx = x1 - x0;
+				dy = y1 - y0;
 			}
 
 			double coeff = (double) dx / (double) dy;
 
 			for(int y = 0; y <= dy; y++) {
-				ssd1306.setPixel(x0 + (int) Math.round(y + coeff), y + y0, true);
+				ssd1306.setPixel(x0 + (int) Math.round(y * coeff), y + y0, true);
 			}
 		}
 	}
