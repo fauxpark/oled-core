@@ -163,7 +163,7 @@ public class SSD1306Impl extends SSD1306 {
 			command(Command.SET_SEGMENT_REMAP);
 		} else {
 			command(Command.SET_COM_SCAN_DEC);
-			command(Command.SET_COM_PINS, 0x02);
+			command(Command.SET_COM_PINS, height == 64 ? 0x12 : 0x02);
 		}
 
 		super.setVFlipped(vFlipped);
