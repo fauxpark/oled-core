@@ -49,6 +49,8 @@ public class Graphics {
 
 				x++;
 			}
+
+			x++;
 		}
 	}
 
