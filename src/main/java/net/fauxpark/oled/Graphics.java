@@ -133,9 +133,9 @@ public class Graphics {
 	 */
 	public void rectangle(int x, int y, int width, int height, boolean fill) {
 		if(fill) {
-			for(int i = x; i < width; i++) {
-				for(int j = y; j < height; j++) {
-					ssd1306.setPixel(i, j, true);
+			for(int i = 0; i < width; i++) {
+				for(int j = 0; j < height; j++) {
+					ssd1306.setPixel(x + i, y + j, true);
 				}
 			}
 		} else if(width > 0 && height > 0) {
