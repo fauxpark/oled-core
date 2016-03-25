@@ -138,11 +138,11 @@ public class Graphics {
 					ssd1306.setPixel(i, j, true);
 				}
 			}
-		} else {
-			line(x, y, x, y + height);
-			line(x, y + height, x + width, y + height);
-			line(x + width, y + height, x + width, y);
-			line(x + width, y, x, y);
+		} else if(width > 0 && height > 0) {
+			line(x, y, x, y + height - 1);
+			line(x, y + height - 1, x + width - 1, y + height - 1);
+			line(x + width - 1, y + height - 1, x + width - 1, y);
+			line(x + width - 1, y, x, y);
 		}
 	}
 
