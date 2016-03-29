@@ -145,13 +145,14 @@ public class SSD1306Impl extends SSD1306 {
 
 	@Override
 	public void setHFlipped(boolean hFlipped) {
-		// TODO
-
 		if(hFlipped) {
-
+			command(Command.SET_SEGMENT_REMAP);
 		} else {
-
+			command(Command.SET_SEGMENT_REMAP_REVERSE);
 		}
+
+		// Horizontal flipping is not immediate for whatever reason
+		display();
 
 		super.setHFlipped(hFlipped);
 	}
@@ -160,10 +161,8 @@ public class SSD1306Impl extends SSD1306 {
 	public void setVFlipped(boolean vFlipped) {
 		if(vFlipped) {
 			command(Command.SET_COM_SCAN_INC);
-			command(Command.SET_SEGMENT_REMAP);
 		} else {
 			command(Command.SET_COM_SCAN_DEC);
-			command(Command.SET_COM_PINS, height == 64 ? 0x12 : 0x02);
 		}
 
 		super.setVFlipped(vFlipped);
