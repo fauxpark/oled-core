@@ -69,15 +69,15 @@ public class SSD1306Impl extends SSD1306 {
 		command(Command.SET_DISPLAY_CLOCK_DIV, width);
 		command(Command.SET_MULTIPLEX_RATIO, width - 1);
 		command(Command.SET_DISPLAY_OFFSET, 0);
-		command(Command.SET_START_LINE_40);
+		command(Command.SET_START_LINE_00);
 		command(Command.SET_CHARGE_PUMP, externalVcc ? Constant.CHARGE_PUMP_DISABLE : Constant.CHARGE_PUMP_ENABLE);
 		command(Command.SET_MEMORY_MODE, Constant.MEMORY_MODE_HORIZONTAL);
-		command(Command.SET_SEGMENT_REMAP_REVERSE);
-		command(Command.SET_COM_SCAN_DEC);
+		setHFlipped(false);
+		setVFlipped(false);
 		command(Command.SET_COM_PINS, height == 64 ? 0x12 : 0x02);
 		setContrast(externalVcc ? 0x9F : 0xCF);
 		command(Command.SET_PRECHARGE_PERIOD, externalVcc ? 0x22 : 0xF1);
-		command(Command.SET_VCOM_DESELECT, 0x40);
+		command(Command.SET_VCOMH_DESELECT, Constant.VCOMH_DESELECT_LEVEL_00);
 		command(Command.DISPLAY_ALL_ON_RESUME);
 		setInverted(false);
 		setDisplayOn(true);
@@ -151,9 +151,8 @@ public class SSD1306Impl extends SSD1306 {
 			command(Command.SET_SEGMENT_REMAP_REVERSE);
 		}
 
-		// Horizontal flipping is not immediate for whatever reason
+		// Horizontal flipping is not immediate
 		display();
-
 		super.setHFlipped(hFlipped);
 	}
 

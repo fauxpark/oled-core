@@ -27,6 +27,9 @@ public class SSD1306MockImpl extends SSD1306 {
 	@Override
 	public void startup(boolean externalVcc) {
 		reset();
+		setDisplayOn(false);
+		setHFlipped(false);
+		setVFlipped(false);
 		setContrast(externalVcc ? 0x9F : 0xCF);
 		setInverted(false);
 		setDisplayOn(true);
