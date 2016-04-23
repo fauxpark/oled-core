@@ -52,6 +52,11 @@ public abstract class SSD1306 {
 	private boolean vFlipped;
 
 	/**
+	 * Indicates whether the display is currently scrolling.
+	 */
+	private boolean scrolling;
+
+	/**
 	 * The current contrast level of the display.
 	 */
 	private int contrast;
@@ -184,6 +189,14 @@ public abstract class SSD1306 {
 		this.contrast = contrast;
 	}
 
+	/**
+	 * Get the scrolling state of the display.
+	 *
+	 * @return Whether the display is scrolling.
+	 */
+	public boolean isScrolling() {
+		return scrolling;
+	}
 
 	/**
 	 * Scroll the display horizontally.
@@ -212,12 +225,16 @@ public abstract class SSD1306 {
 	/**
 	 * Start scrolling the display.
 	 */
-	public abstract void startScroll();
+	public void startScroll() {
+		scrolling = true;
+	}
 
 	/**
 	 * Stop scrolling the display.
 	 */
-	public abstract void stopScroll();
+	public void stopScroll() {
+		scrolling = false;
+	}
 
 	/**
 	 * Get the horizontal flip state of the display.

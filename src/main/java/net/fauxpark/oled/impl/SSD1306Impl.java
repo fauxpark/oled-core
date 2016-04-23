@@ -181,11 +181,13 @@ public class SSD1306Impl extends SSD1306 {
 	@Override
 	public void startScroll() {
 		command(Command.ACTIVATE_SCROLL);
+		super.startScroll();
 	}
 
 	@Override
 	public void stopScroll() {
 		command(Command.DEACTIVATE_SCROLL);
+		super.stopScroll();
 	}
 
 	@Override
