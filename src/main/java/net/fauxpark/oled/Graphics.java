@@ -1,5 +1,9 @@
 package net.fauxpark.oled;
 
+import java.awt.image.BufferedImage;
+import java.awt.image.Raster;
+import java.io.IOException;
+
 import net.fauxpark.oled.font.Font;
 
 /**
@@ -14,7 +18,7 @@ public class Graphics {
 	private SSD1306 ssd1306;
 
 	/**
-	 * Display constructor.
+	 * Graphics constructor.
 	 *
 	 * @param ssd1306 The SSD1306 object to use.
 	 */
@@ -56,9 +60,23 @@ public class Graphics {
 
 	/**
 	 * Draw an image onto the display.
+	 *
+	 * @param image The image to draw.
+	 * @param x The X position of the image.
+	 * @param y The Y position of the image.
+	 * @param width The width to resize the image to.
+	 * @param height The height to resize the image to.
 	 */
-	public void image() {
-		// TODO
+	public void image(BufferedImage image, int x, int y, int width, int height) throws IOException {
+		BufferedImage mono = new BufferedImage(ssd1306.getWidth(), ssd1306.getHeight(), BufferedImage.TYPE_BYTE_BINARY);
+		mono.createGraphics().drawImage(image, x, y, width, height, null);
+		Raster r = mono.getRaster();
+
+		for(int i = 0; i < ssd1306.getHeight(); i++) {
+			for(int j = 0; j < ssd1306.getWidth(); j++) {
+				ssd1306.setPixel(j, i, r.getSample(j, i, 0) > 0);
+			}
+		}
 	}
 
 	/**
