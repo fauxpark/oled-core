@@ -114,6 +114,11 @@ public class SSD1306Impl extends SSD1306 {
 		command(Command.SET_COLUMN_ADDRESS, 0, width - 1);
 		command(Command.SET_PAGE_ADDRESS, 0, pages - 1);
 		data(buffer);
+
+		// Jump start scrolling again if new data is written while enabled
+		if(isScrolling()) {
+			noOp();
+		}
 	}
 
 	@Override
@@ -169,7 +174,7 @@ public class SSD1306Impl extends SSD1306 {
 
 	@Override
 	public void scrollHorizontally(boolean direction, int start, int end, int step) {
-		command(direction ? Command.LEFT_HORIZONTAL_SCROLL : Command.RIGHT_HORIZONTAL_SCROLL, Constant.DUMMY_BYTE_00, start, step, end, 0x01, Constant.DUMMY_BYTE_FF);
+		command(direction ? Command.LEFT_HORIZONTAL_SCROLL : Command.RIGHT_HORIZONTAL_SCROLL, Constant.DUMMY_BYTE_00, start, step, end, Constant.DUMMY_BYTE_00, Constant.DUMMY_BYTE_FF);
 	}
 
 	@Override
@@ -188,6 +193,11 @@ public class SSD1306Impl extends SSD1306 {
 	public void stopScroll() {
 		command(Command.DEACTIVATE_SCROLL);
 		super.stopScroll();
+	}
+
+	@Override
+	public void noOp() {
+		command(Command.NOOP);
 	}
 
 	@Override

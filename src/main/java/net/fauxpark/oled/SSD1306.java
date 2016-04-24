@@ -237,6 +237,11 @@ public abstract class SSD1306 {
 	}
 
 	/**
+	 * No operation.
+	 */
+	public abstract void noOp();
+
+	/**
 	 * Get the horizontal flip state of the display.
 	 *
 	 * @return Whether the display is horizontally flipped.

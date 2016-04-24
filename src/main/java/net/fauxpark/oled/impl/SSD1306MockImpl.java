@@ -60,6 +60,9 @@ public class SSD1306MockImpl extends SSD1306 {
 	public void scrollDiagonally(boolean direction, int start, int end, int step) {}
 
 	@Override
+	public void noOp() {}
+
+	@Override
 	public void command(int command, int... params) {}
 
 	@Override
