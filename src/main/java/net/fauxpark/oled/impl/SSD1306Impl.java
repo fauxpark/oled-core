@@ -173,14 +173,14 @@ public class SSD1306Impl extends SSD1306 {
 	}
 
 	@Override
-	public void scrollHorizontally(boolean direction, int start, int end, int step) {
-		command(direction ? Command.LEFT_HORIZONTAL_SCROLL : Command.RIGHT_HORIZONTAL_SCROLL, Constant.DUMMY_BYTE_00, start, step, end, Constant.DUMMY_BYTE_00, Constant.DUMMY_BYTE_FF);
+	public void scrollHorizontally(boolean direction, int start, int end, int speed) {
+		command(direction ? Command.LEFT_HORIZONTAL_SCROLL : Command.RIGHT_HORIZONTAL_SCROLL, Constant.DUMMY_BYTE_00, start, speed, end, Constant.DUMMY_BYTE_00, Constant.DUMMY_BYTE_FF);
 	}
 
 	@Override
-	public void scrollDiagonally(boolean direction, int start, int end, int step) {
-		command(Command.SET_VERTICAL_SCROLL_AREA, 0, height);
-		command(direction ? Command.VERTICAL_AND_LEFT_HORIZONTAL_SCROLL : Command.VERTICAL_AND_RIGHT_HORIZONTAL_SCROLL, Constant.DUMMY_BYTE_00, start, step, end, 0x01);
+	public void scrollDiagonally(boolean direction, int start, int end, int offset, int rows, int speed, int step) {
+		command(Command.SET_VERTICAL_SCROLL_AREA, offset, rows);
+		command(direction ? Command.VERTICAL_AND_LEFT_HORIZONTAL_SCROLL : Command.VERTICAL_AND_RIGHT_HORIZONTAL_SCROLL, Constant.DUMMY_BYTE_00, start, speed, end, step);
 	}
 
 	@Override

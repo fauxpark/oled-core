@@ -54,10 +54,10 @@ public class SSD1306MockImpl extends SSD1306 {
 	public synchronized void display() {}
 
 	@Override
-	public void scrollHorizontally(boolean direction, int start, int end, int step) {}
+	public void scrollHorizontally(boolean direction, int start, int end, int speed) {}
 
 	@Override
-	public void scrollDiagonally(boolean direction, int start, int end, int step) {}
+	public void scrollDiagonally(boolean direction, int start, int end, int offset, int rows, int speed, int step) {}
 
 	@Override
 	public void noOp() {}

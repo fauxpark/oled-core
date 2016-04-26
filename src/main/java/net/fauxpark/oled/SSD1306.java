@@ -204,11 +204,11 @@ public abstract class SSD1306 {
 	 * @param direction The direction to scroll, where a value of true results in the display scrolling to the left.
 	 * @param start The start page address, from 0 to 7.
 	 * @param end The end page address, from 0 to 7.
-	 * @param step The scrolling speed.
+	 * @param speed The scrolling speed (scroll step).
 	 *
 	 * @see Constant#SCROLL_STEP_5
 	 */
-	public abstract void scrollHorizontally(boolean direction, int start, int end, int step);
+	public abstract void scrollHorizontally(boolean direction, int start, int end, int speed);
 
 	/**
 	 * Scroll the display horizontally and vertically.
@@ -216,11 +216,14 @@ public abstract class SSD1306 {
 	 * @param direction The direction to scroll, where a value of true results in the display scrolling to the left.
 	 * @param start The start page address, from 0 to 7.
 	 * @param end The end page address, from 0 to 7.
-	 * @param step The scrolling speed.
+	 * @param offset The number of rows from the top to start the vertical scroll area at.
+	 * @param rows The number of rows in the vertical scroll area.
+	 * @param speed The scrolling speed (scroll step).
+	 * @param step The number of rows to scroll vertically each frame.
 	 *
 	 * @see Constant#SCROLL_STEP_5
 	 */
-	public abstract void scrollDiagonally(boolean direction, int start, int end, int step);
+	public abstract void scrollDiagonally(boolean direction, int start, int end, int offset, int rows, int speed, int step);
 
 	/**
 	 * Start scrolling the display.
