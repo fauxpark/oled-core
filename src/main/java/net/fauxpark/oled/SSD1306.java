@@ -95,6 +95,7 @@ public abstract class SSD1306 {
 	 */
 	public void shutdown() {
 		initialised = false;
+		contrast = 0;
 	}
 
 	/**
