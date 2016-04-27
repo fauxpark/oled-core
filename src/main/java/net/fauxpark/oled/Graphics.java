@@ -68,13 +68,13 @@ public class Graphics {
 	 * @param height The height to resize the image to.
 	 */
 	public void image(BufferedImage image, int x, int y, int width, int height) throws IOException {
-		BufferedImage mono = new BufferedImage(ssd1306.getWidth(), ssd1306.getHeight(), BufferedImage.TYPE_BYTE_BINARY);
-		mono.createGraphics().drawImage(image, x, y, width, height, null);
+		BufferedImage mono = new BufferedImage(width, height, BufferedImage.TYPE_BYTE_BINARY);
+		mono.createGraphics().drawImage(image, 0, 0, width, height, null);
 		Raster r = mono.getRaster();
 
-		for(int i = 0; i < ssd1306.getHeight(); i++) {
-			for(int j = 0; j < ssd1306.getWidth(); j++) {
-				ssd1306.setPixel(j, i, r.getSample(j, i, 0) > 0);
+		for(int i = 0; i < height; i++) {
+			for(int j = 0; j < width; j++) {
+				ssd1306.setPixel(x + j, y + i, r.getSample(j, i, 0) > 0);
 			}
 		}
 	}
