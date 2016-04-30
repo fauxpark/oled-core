@@ -95,7 +95,11 @@ public abstract class SSD1306 {
 	 */
 	public void shutdown() {
 		initialised = false;
-		contrast = 0;
+		setInverted(false);
+		setHFlipped(false);
+		setVFlipped(false);
+		stopScroll();
+		setContrast(0);
 	}
 
 	/**
