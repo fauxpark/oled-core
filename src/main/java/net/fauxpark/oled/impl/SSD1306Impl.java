@@ -68,7 +68,7 @@ public class SSD1306Impl extends SSD1306 {
 		setDisplayOn(false);
 		command(Command.SET_DISPLAY_CLOCK_DIV, width);
 		command(Command.SET_MULTIPLEX_RATIO, width - 1);
-		command(Command.SET_DISPLAY_OFFSET, 0);
+		setOffset(0);
 		command(Command.SET_START_LINE_00);
 		command(Command.SET_CHARGE_PUMP, externalVcc ? Constant.CHARGE_PUMP_DISABLE : Constant.CHARGE_PUMP_ENABLE);
 		command(Command.SET_MEMORY_MODE, Constant.MEMORY_MODE_HORIZONTAL);
@@ -146,6 +146,12 @@ public class SSD1306Impl extends SSD1306 {
 
 		command(Command.SET_CONTRAST, contrast);
 		super.setContrast(contrast);
+	}
+
+	@Override
+	public void setOffset(int offset) {
+		command(Command.SET_DISPLAY_OFFSET, offset);
+		super.setOffset(offset);
 	}
 
 	@Override

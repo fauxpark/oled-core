@@ -62,6 +62,11 @@ public abstract class SSD1306 {
 	private int contrast;
 
 	/**
+	 * The current display offset.
+	 */
+	private int offset;
+
+	/**
 	 * SSD1306 constructor.
 	 *
 	 * @param width The width of the display in pixels.
@@ -100,6 +105,7 @@ public abstract class SSD1306 {
 		setVFlipped(false);
 		stopScroll();
 		setContrast(0);
+		setOffset(0);
 	}
 
 	/**
@@ -192,6 +198,24 @@ public abstract class SSD1306 {
 	 */
 	public void setContrast(int contrast) {
 		this.contrast = contrast;
+	}
+
+	/**
+	 * Get the display offset.
+	 *
+	 * @return The number of rows the display is offset by.
+	 */
+	public int getOffset() {
+		return offset;
+	}
+
+	/**
+	 * Set the display offset.
+	 *
+	 * @param offset The number of rows to offset the display by.
+	 */
+	public void setOffset(int offset) {
+		this.offset = offset;
 	}
 
 	/**
