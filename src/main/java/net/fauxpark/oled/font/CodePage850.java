@@ -8,19 +8,24 @@ package net.fauxpark.oled.font;
  */
 public class CodePage850 implements Font {
 	/**
+	 * The name of the font's character set.
+	 */
+	public static final String NAME = "IBM850";
+
+	/**
 	 * The number of columns each glyph is comprised of.
 	 */
-	private static final int columns = 5;
+	private static final int COLUMNS = 5;
 
 	/**
 	 * The number of rows each glyph is comprised of.
 	 */
-	private static final int rows = 8;
+	private static final int ROWS = 8;
 
 	/**
 	 * The font glyphs.
 	 */
-	private static final int[] glyphs = {
+	private static final int[] GLYPHS = {
 		0x00, 0x00, 0x00, 0x00, 0x00,
 		0x00, 0x00, 0x00, 0x00, 0x00,
 		0x00, 0x00, 0x00, 0x00, 0x00,
@@ -280,22 +285,22 @@ public class CodePage850 implements Font {
 	};
 
 	@Override
+	public String getName() {
+		return NAME;
+	}
+
+	@Override
 	public int getColumns() {
-		return columns;
+		return COLUMNS;
 	}
 
 	@Override
 	public int getRows() {
-		return rows;
+		return ROWS;
 	}
 
 	@Override
 	public int[] getGlyphs() {
-		return glyphs;
-	}
-
-	@Override
-	public String toString() {
-		return String.format("{0}-{1}x{2}", getClass().getSimpleName(), columns, rows);
+		return GLYPHS;
 	}
 }

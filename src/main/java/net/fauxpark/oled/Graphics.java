@@ -3,6 +3,7 @@ package net.fauxpark.oled;
 import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
 import java.io.IOException;
+import java.nio.charset.Charset;
 
 import net.fauxpark.oled.font.Font;
 
@@ -38,10 +39,10 @@ public class Graphics {
 		int rows = font.getRows();
 		int cols = font.getColumns();
 		int[] glyphs = font.getGlyphs();
+		byte[] bytes = text.getBytes(Charset.forName(font.getName()));
 
 		for(int i = 0; i < text.length(); i++) {
-			byte c = (byte) text.charAt(i);
-			int p = c * cols;
+			int p = (bytes[i] & 0xFF) * cols;
 
 			for(int col = 0; col < cols; col++) {
 				int mask = glyphs[p++];
