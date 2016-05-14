@@ -38,7 +38,7 @@ ssd1306.display();
 ssd1306.setInverted(true);
 
 // Flips the display upside down
-ssd1306.verticalFlip(true);
+ssd1306.setVFlipped(true);
 ```
 
 If you are testing on something other than a Raspberry Pi, you can use the `SSD1306MockImpl` class instead
@@ -50,11 +50,11 @@ As the SSD1306 in SPI mode does not provide any information as to its state, the
 
 ## Basic Graphics
 You can also do some basic line & shape drawing using the `Graphics` class.
-Just pass the SSD1306 object to the `Graphics` constructor:
+Just call the `getGraphics()` method on the SSD1306 instance:
 
 ```java
 SSD1306 ssd1306 = new SSD1306Impl(128, 64, SpiChannel.CS0, RaspiPin.GPIO_15, RaspiPin.GPIO_16);
-Graphics graphics = new Graphics(ssd1306);
+Graphics graphics = ssd1306.getGraphics();
 
 ssd1306.startup(false);
 

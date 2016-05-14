@@ -7,6 +7,11 @@ package net.fauxpark.oled;
  */
 public abstract class SSD1306 {
 	/**
+	 * A helper class for drawing lines, shapes, text and images.
+	 */
+	private Graphics graphics;
+
+	/**
 	 * The width of the display in pixels.
 	 */
 	protected int width;
@@ -380,4 +385,17 @@ public abstract class SSD1306 {
 	 * @param data The data to send.
 	 */
 	public abstract void data(byte[] data);
+
+	/**
+	 * Get the Graphics instance, creating it if necessary.
+	 *
+	 * @return The Graphics instance.
+	 */
+	public final Graphics getGraphics() {
+		if(graphics == null) {
+			graphics = new Graphics(this);
+		}
+
+		return graphics;
+	}
 }

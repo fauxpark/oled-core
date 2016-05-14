@@ -23,7 +23,7 @@ public class Graphics {
 	 *
 	 * @param ssd1306 The SSD1306 object to use.
 	 */
-	public Graphics(SSD1306 ssd1306) {
+	Graphics(SSD1306 ssd1306) {
 		this.ssd1306 = ssd1306;
 	}
 
