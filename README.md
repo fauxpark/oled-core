@@ -1,7 +1,7 @@
 # oled-core: SSD1306 in Java
 This is a driver for the [Adafruit SSD1306 OLED display](https://www.adafruit.com/categories/98) on the Raspberry Pi, written (almost) completely in Java.
 It makes use of the [Pi4J](https://github.com/Pi4J/pi4j) library, which does all the fiddly bits in native code to
-operate the GPIO pins and drive the SPI interface.
+operate the GPIO pins and drive the SPI and I<sup>2</sup>C interfaces.
 
 The aim of this project is to abstract away the low-level aspects of the SSD1306 and focus on manipulating the
 contents of the screen through a very simple API.
@@ -9,22 +9,25 @@ contents of the screen through a very simple API.
 ## GPIO Pinout
 The pinout for the Raspberry Pi GPIO header is as follows:
 
-| Display Pin  | Physical Pin        |
-| ------------:|:------------------- |
-| Ground       | 6                   |
-| Voltage In   | 1                   |
-| 3v3          | N/C                 |
-| Chip Select  | 24 (CS0) / 26 (CS1) |
-| Reset        | 8 (GPIO_15) / Any   |
-| Data/Command | 10 (GPIO_16) / Any  |
-| Clock        | 23                  |
-| Data         | 19                  |
+| Display Pin  | Physical Pin (SPI)  | Physical Pin (I<sup>2</sup>C) |
+| ------------:|:------------------- |:----------------------------- |
+| Ground       | 6                   | 6                             |
+| Voltage In   | 1                   | 1                             |
+| 3v3          | N/C                 | N/C                           |
+| Chip Select  | 24 (CS0) / 26 (CS1) | N/C                           |
+| Reset        | 8 (GPIO_15) / Any   | 8 (GPIO_15) / Any             |
+| Data/Command | 10 (GPIO_16) / Any  | N/C (0x3D) / GND (0x3C)       |
+| Clock        | 23                  | 5                             |
+| Data         | 19                  | 3                             |
 
 ## Getting Started
 To set up the display, simply create a new `SSD1306` object, like so:
 
 ```java
-SSD1306 ssd1306 = new SSD1306Impl(128, 64, SpiChannel.CS0, RaspiPin.GPIO_15, RaspiPin.GPIO_16);
+SSD1306 ssd1306 = new SSD1306SPIImpl(128, 64, SpiChannel.CS0, RaspiPin.GPIO_15, RaspiPin.GPIO_16);
+// Or:
+SSD1306 ssd1306 = new SSD1306I2CImpl(128, 64, RaspiPin.GPIO_15, I2CBus.BUS_1, 0x3D);
+
 // false indicates no external VCC
 ssd1306.startup(false);
 
@@ -46,14 +49,14 @@ to mostly simulate the display without Pi4J complaining about your platform. How
 available (such as scrolling, as it is done by the display itself).
 
 Most properties of the display (eg. invertedness, display on/off) are reachable through getters and setters.
-As the SSD1306 in SPI mode does not provide any information as to its state, these are implemented as fields in the `SSD1306` class.
+As the SSD1306 does not provide any information as to its state, these are implemented as fields in the `SSD1306` class.
 
 ## Basic Graphics
 You can also do some basic line & shape drawing using the `Graphics` class.
 Just call the `getGraphics()` method on the SSD1306 instance:
 
 ```java
-SSD1306 ssd1306 = new SSD1306Impl(128, 64, SpiChannel.CS0, RaspiPin.GPIO_15, RaspiPin.GPIO_16);
+SSD1306 ssd1306 = new SSD1306SPIImpl(128, 64, SpiChannel.CS0, RaspiPin.GPIO_15, RaspiPin.GPIO_16);
 Graphics graphics = ssd1306.getGraphics();
 
 ssd1306.startup(false);
