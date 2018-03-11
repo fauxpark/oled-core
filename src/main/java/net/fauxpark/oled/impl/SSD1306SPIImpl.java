@@ -19,7 +19,7 @@ import net.fauxpark.oled.SSD1306;
  *
  * @author fauxpark
  */
-public class SSD1306Impl extends SSD1306 {
+public class SSD1306SPIImpl extends SSD1306 {
 	/**
 	 * The internal GPIO instance.
 	 */
@@ -41,7 +41,7 @@ public class SSD1306Impl extends SSD1306 {
 	private SpiDevice spi;
 
 	/**
-	 * SSD1306Impl constructor.
+	 * SSD1306SPIImpl constructor.
 	 *
 	 * @param width The width of the display in pixels.
 	 * @param height The height of the display in pixels.
@@ -49,7 +49,7 @@ public class SSD1306Impl extends SSD1306 {
 	 * @param rstPin The GPIO pin to use for the RST line.
 	 * @param dcPin The GPIO pin to use for the D/C line.
 	 */
-	public SSD1306Impl(int width, int height, SpiChannel channel, Pin rstPin, Pin dcPin) {
+	public SSD1306SPIImpl(int width, int height, SpiChannel channel, Pin rstPin, Pin dcPin) {
 		super(width, height);
 		gpio = GpioFactory.getInstance();
 		this.rstPin = gpio.provisionDigitalOutputPin(rstPin);
