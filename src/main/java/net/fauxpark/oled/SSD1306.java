@@ -372,7 +372,7 @@ public abstract class SSD1306 {
 	}
 
 	/**
-	 * Send a command over SPI.
+	 * Send a command to the display.
 	 *
 	 * @param command The command to send.
 	 * @param params Any parameters the command requires.
@@ -380,7 +380,7 @@ public abstract class SSD1306 {
 	public abstract void command(int command, int... params);
 
 	/**
-	 * Send display data over SPI.
+	 * Send pixel data to the display.
 	 *
 	 * @param data The data to send.
 	 */
