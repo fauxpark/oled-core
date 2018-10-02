@@ -1,9 +1,15 @@
-# oled-core: SSD1306 in Java
+# oled-core: SSDxxxx in Java
 
-This is a driver for the [Adafruit SSD1306 OLED display](https://www.adafruit.com/categories/98) on the Raspberry Pi, written (almost) completely in Java.
+This is a driver for Solomon Systech Displays (SSD1306, SSD1327 - f.e. [Adafruit SSD1306 OLED display](https://www.adafruit.com/categories/98) and others) on the Raspberry Pi, written (almost) completely in Java.
 It makes use of the [Pi4J](https://github.com/Pi4J/pi4j) library, which does all the fiddly bits in native code to operate the GPIO pins and drive the SPI and I<sup>2</sup>C interfaces.
 
 The aim of this project is to abstract away the low-level aspects of the SSD1306 and focus on manipulating the contents of the screen through a very simple API.
+
+### Display support
+
+* SSD1306 working SPI and I2C
+* SSD1327 (128px * 128px * 4bit grey) in progress
+* other types should be easy to add if pixel-bitsize is the same
 
 ## GPIO Pinout
 
