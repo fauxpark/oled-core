@@ -12,6 +12,7 @@ import com.pi4j.io.i2c.I2CFactory.UnsupportedBusNumberException;
 
 import net.fauxpark.oled.Command;
 import net.fauxpark.oled.Constant;
+import net.fauxpark.oled.SSD1306Display;
 import net.fauxpark.oled.SSDisplay;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,18 +22,8 @@ import org.slf4j.LoggerFactory;
  *
  * @author fauxpark
  */
-public class SSD1306I2CImpl extends SSDisplay {
+public class SSD1306I2CImpl extends SSD1306Display {
     private static final Logger logger = LoggerFactory.getLogger(SSD1306I2CImpl.class);
-
-    /**
-     * The internal GPIO instance.
-     */
-    private GpioController gpio;
-
-    /**
-     * The GPIO pin corresponding to the RST line on the display - if any
-     */
-    private GpioPinDigitalOutput rstPin = null;
 
     /**
      * The internal I<sup>2</sup>C device.
@@ -54,93 +45,18 @@ public class SSD1306I2CImpl extends SSDisplay {
      * @param address The I<sup>2</sup>C address of the display.
      */
     public SSD1306I2CImpl(int width, int height, Pin rstPin, int bus, int address) throws IOException {
-        super(width, height);
-        gpio = GpioFactory.getInstance();
-        if (rstPin != null) {
-            this.rstPin = gpio.provisionDigitalOutputPin(rstPin);
-        }
+        super(width, height, rstPin);
 
         try {
             i2c = I2CFactory.getInstance(bus).getDevice(address);
         } catch (UnsupportedBusNumberException e) {
+            // rethrow as IOException
             throw new IOException(e);
         }
     }
 
-    @Override
-    public void startup(boolean externalVcc) {
-        reset();
-        setDisplayOn(false);
-        command(Command.SET_DISPLAY_CLOCK_DIV, 0x80);
-        command(Command.SET_MULTIPLEX_RATIO, height == 64 ? 0x3F : 0x1F);
-        setOffset(0);
-        command(Command.SET_START_LINE_00);
-        command(Command.SET_CHARGE_PUMP, externalVcc ? Constant.CHARGE_PUMP_DISABLE : Constant.CHARGE_PUMP_ENABLE);
-        command(Command.SET_MEMORY_MODE, Constant.MEMORY_MODE_HORIZONTAL);
-        setHFlipped(false);
-        setVFlipped(false);
-        command(Command.SET_COM_PINS, height == 64 ? 0x12 : 0x02);
-        setContrast(height == 64 ? 0x8F : externalVcc ? 0x9F : 0xCF);
-        command(Command.SET_PRECHARGE_PERIOD, externalVcc ? 0x22 : 0xF1);
-        command(Command.SET_VCOMH_DESELECT, Constant.VCOMH_DESELECT_LEVEL_00);
-        command(Command.DISPLAY_ALL_ON_RESUME);
-        setInverted(false);
-        setDisplayOn(true);
-        clear();
-        display();
-        super.startup(externalVcc);
-    }
 
-    @Override
-    public void shutdown() {
-        clear();
-        display();
-        setDisplayOn(false);
-        reset();
-        gpio.shutdown();
-        super.shutdown();
-    }
 
-    @Override
-    public void reset() {
-        if (rstPin == null) {
-            // TODO sw reset possible?!
-            logger.warn("reset - no effect without reset pin");
-            return;
-        }
-        try {
-            rstPin.setState(true);
-            Thread.sleep(1);
-            rstPin.setState(false);
-            Thread.sleep(10);
-            rstPin.setState(true);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
-
-    @Override
-    public synchronized void display() {
-        command(Command.SET_COLUMN_ADDRESS, 0, width - 1);
-        command(Command.SET_PAGE_ADDRESS, 0, pages - 1);
-        data(buffer);
-
-        // Jump start scrolling again if new data is written while enabled
-        if (isScrolling()) {
-            noOp();
-        }
-    }
-
-    @Override
-    public void setDisplayOn(boolean displayOn) {
-        if (displayOn) {
-            command(Command.DISPLAY_ON);
-        } else {
-            command(Command.DISPLAY_OFF);
-        }
-
-        super.setDisplayOn(displayOn);
-    }
 
     @Override
     public void setInverted(boolean inverted) {

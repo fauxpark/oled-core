@@ -1,13 +1,35 @@
 package net.fauxpark.oled;
 
+import com.pi4j.io.gpio.GpioController;
+import com.pi4j.io.gpio.GpioFactory;
+import com.pi4j.io.gpio.GpioPinDigitalOutput;
+import com.pi4j.io.gpio.Pin;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * A base class for defining implementations of the SSDisplay OLED display.
  *
  * @author fauxpark
  */
 public abstract class SSDisplay {
+	private static final Logger logger = LoggerFactory.getLogger(SSDisplay.class);
+
+	/**
+	 * The internal GPIO instance.
+	 */
+	private GpioController gpio;
+
+	/**
+	 * The GPIO pin corresponding to the RST line on the display.
+	 */
+	private GpioPinDigitalOutput rstPin;
+
+
+
 	/**
 	 * A helper class for drawing lines, shapes, text and images.
+	 * @deprecated used anymore?
 	 */
 	private Graphics graphics;
 
@@ -78,10 +100,25 @@ public abstract class SSDisplay {
 	 * @param height The height of the display in pixels.
 	 */
 	public SSDisplay(int width, int height) {
+		init(width, height, null);
+	}
+
+	public SSDisplay(int width, int height, Pin rstPin) {
+		init(width, height, rstPin);
+	}
+
+	private void init(int width, int height, Pin rstPin) {
 		this.width = width;
 		this.height = height;
+
 		pages = height / 8;
 		buffer = new byte[width * pages];
+
+		gpio = GpioFactory.getInstance();
+
+		if (rstPin != null) {
+			this.rstPin = getGpio().provisionDigitalOutputPin(rstPin);
+		}
 	}
 
 	/**
@@ -97,6 +134,11 @@ public abstract class SSDisplay {
 	 * @param externalVcc Indicates whether the display is being driven by an external power source.
 	 */
 	public void startup(boolean externalVcc) {
+		setDisplayOn(true);
+		setInverted(false);
+		clear();
+		display();
+
 		initialised = true;
 	}
 
@@ -104,20 +146,42 @@ public abstract class SSDisplay {
 	 * Start the power off procedure for the display.
 	 */
 	public void shutdown() {
+		clear();
+		display();
+		reset();
+
 		initialised = false;
 		setInverted(false);
 		setHFlipped(false);
 		setVFlipped(false);
-		stopScroll();
-		setContrast(0);
+		// stopScroll();
+		// setContrast(0);
 		setOffset(0);
+
+		setDisplayOn(false);
+
+		gpio.shutdown();
 	}
 
 	/**
 	 * Reset the display.
 	 */
-	public abstract void reset();
-
+	public void reset() {
+		if (rstPin == null) {
+			// TODO sw reset possible?!
+			logger.warn("reset - no effect without reset pin");
+			return;
+		}
+		try {
+			rstPin.setState(true);
+			Thread.sleep(1);
+			rstPin.setState(false);
+			Thread.sleep(10);
+			rstPin.setState(true);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
 	/**
 	 * Clear the buffer.
 	 * <br/>
@@ -130,7 +194,16 @@ public abstract class SSDisplay {
 	/**
 	 * Send the buffer to the display.
 	 */
-	public abstract void display();
+	public synchronized void display() {
+		command(Command.SET_COLUMN_ADDRESS, 0, width - 1);
+		command(Command.SET_PAGE_ADDRESS, 0, pages - 1);
+		data(buffer);
+
+		// Jump start scrolling again if new data is written while enabled
+		if(isScrolling()) {
+			noOp();
+		}
+	}
 
 	/**
 	 * Get the width of the display.
@@ -165,9 +238,14 @@ public abstract class SSDisplay {
 	 * @param displayOn Whether to turn the display on.
 	 */
 	public void setDisplayOn(boolean displayOn) {
+		if (displayOn) {
+			command(Command.DISPLAY_ON);
+		} else {
+			command(Command.DISPLAY_OFF);
+		}
+
 		this.displayOn = displayOn;
 	}
-
 	/**
 	 * Get the inverted state of the display.
 	 *
@@ -389,6 +467,7 @@ public abstract class SSDisplay {
 	/**
 	 * Get the Graphics instance, creating it if necessary.
 	 *
+	 * @deprecated in use?!
 	 * @return The Graphics instance.
 	 */
 	public final Graphics getGraphics() {
@@ -397,5 +476,13 @@ public abstract class SSDisplay {
 		}
 
 		return graphics;
+	}
+
+	public GpioController getGpio() {
+		return gpio;
+	}
+
+	public void setGpio(GpioController gpio) {
+		this.gpio = gpio;
 	}
 }

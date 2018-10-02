@@ -12,6 +12,7 @@ import com.pi4j.io.spi.SpiFactory;
 
 import net.fauxpark.oled.Command;
 import net.fauxpark.oled.Constant;
+import net.fauxpark.oled.SSD1306Display;
 import net.fauxpark.oled.SSDisplay;
 
 /**
@@ -19,16 +20,8 @@ import net.fauxpark.oled.SSDisplay;
  *
  * @author fauxpark
  */
-public class SSD1306SPIImpl extends SSDisplay {
-	/**
-	 * The internal GPIO instance.
-	 */
-	private GpioController gpio;
-
-	/**
-	 * The GPIO pin corresponding to the RST line on the display.
-	 */
-	private GpioPinDigitalOutput rstPin;
+public class SSD1306SPIImpl extends SSD1306Display {
+	public static final int SPI_SPEED = 8000000;
 
 	/**
 	 * The GPIO pin corresponding to the D/C line on the display.
@@ -50,83 +43,16 @@ public class SSD1306SPIImpl extends SSDisplay {
 	 * @param dcPin The GPIO pin to use for the D/C line.
 	 */
 	public SSD1306SPIImpl(int width, int height, SpiChannel channel, Pin rstPin, Pin dcPin) throws IOException {
-		super(width, height);
-		gpio = GpioFactory.getInstance();
-		this.rstPin = gpio.provisionDigitalOutputPin(rstPin);
-		this.dcPin = gpio.provisionDigitalOutputPin(dcPin);
+		super(width, height, rstPin);
 
-		spi = SpiFactory.getInstance(channel, 8000000);
+		this.dcPin = getGpio().provisionDigitalOutputPin(dcPin);
+		spi = SpiFactory.getInstance(channel, SPI_SPEED);
 	}
 
-	@Override
-	public void startup(boolean externalVcc) {
-		reset();
-		setDisplayOn(false);
-		command(Command.SET_DISPLAY_CLOCK_DIV, width);
-		command(Command.SET_MULTIPLEX_RATIO, width - 1);
-		setOffset(0);
-		command(Command.SET_START_LINE_00);
-		command(Command.SET_CHARGE_PUMP, externalVcc ? Constant.CHARGE_PUMP_DISABLE : Constant.CHARGE_PUMP_ENABLE);
-		command(Command.SET_MEMORY_MODE, Constant.MEMORY_MODE_HORIZONTAL);
-		setHFlipped(false);
-		setVFlipped(false);
-		command(Command.SET_COM_PINS, height == 64 ? 0x12 : 0x02);
-		setContrast(externalVcc ? 0x9F : 0xCF);
-		command(Command.SET_PRECHARGE_PERIOD, externalVcc ? 0x22 : 0xF1);
-		command(Command.SET_VCOMH_DESELECT, Constant.VCOMH_DESELECT_LEVEL_00);
-		command(Command.DISPLAY_ALL_ON_RESUME);
-		setInverted(false);
-		setDisplayOn(true);
-		clear();
-		display();
-		super.startup(externalVcc);
-	}
 
-	@Override
-	public void shutdown() {
-		clear();
-		display();
-		setDisplayOn(false);
-		reset();
-		gpio.shutdown();
-		super.shutdown();
-	}
 
-	@Override
-	public void reset() {
-		try {
-			rstPin.setState(true);
-			Thread.sleep(1);
-			rstPin.setState(false);
-			Thread.sleep(10);
-			rstPin.setState(true);
-		} catch(InterruptedException e) {
-			e.printStackTrace();
-		}
-	}
 
-	@Override
-	public synchronized void display() {
-		command(Command.SET_COLUMN_ADDRESS, 0, width - 1);
-		command(Command.SET_PAGE_ADDRESS, 0, pages - 1);
-		data(buffer);
 
-		// Jump start scrolling again if new data is written while enabled
-		if(isScrolling()) {
-			noOp();
-		}
-	}
-
-	@Override
-	public void setDisplayOn(boolean displayOn) {
-		if(displayOn) {
-			command(Command.DISPLAY_ON);
-		} else {
-			command(Command.DISPLAY_OFF);
-		}
-
-		super.setDisplayOn(displayOn);
-	}
 
 	@Override
 	public void setInverted(boolean inverted) {
