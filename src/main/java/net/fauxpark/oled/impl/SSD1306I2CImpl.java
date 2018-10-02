@@ -30,7 +30,7 @@ public class SSD1306I2CImpl extends SSDisplay {
     private GpioController gpio;
 
     /**
-     * The GPIO pin corresponding to the RST line on the display.
+     * The GPIO pin corresponding to the RST line on the display - if any
      */
     private GpioPinDigitalOutput rstPin = null;
 
@@ -53,7 +53,7 @@ public class SSD1306I2CImpl extends SSDisplay {
      * @param bus     The I<sup>2</sup>C bus to use.
      * @param address The I<sup>2</sup>C address of the display.
      */
-    public SSD1306I2CImpl(int width, int height, Pin rstPin, int bus, int address) {
+    public SSD1306I2CImpl(int width, int height, Pin rstPin, int bus, int address) throws IOException {
         super(width, height);
         gpio = GpioFactory.getInstance();
         if (rstPin != null) {
@@ -62,8 +62,8 @@ public class SSD1306I2CImpl extends SSDisplay {
 
         try {
             i2c = I2CFactory.getInstance(bus).getDevice(address);
-        } catch (IOException | UnsupportedBusNumberException e) {
-            e.printStackTrace();
+        } catch (UnsupportedBusNumberException e) {
+            throw new IOException(e);
         }
     }
 

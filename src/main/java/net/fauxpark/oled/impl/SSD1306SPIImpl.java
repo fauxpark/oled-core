@@ -49,17 +49,13 @@ public class SSD1306SPIImpl extends SSDisplay {
 	 * @param rstPin The GPIO pin to use for the RST line.
 	 * @param dcPin The GPIO pin to use for the D/C line.
 	 */
-	public SSD1306SPIImpl(int width, int height, SpiChannel channel, Pin rstPin, Pin dcPin) {
+	public SSD1306SPIImpl(int width, int height, SpiChannel channel, Pin rstPin, Pin dcPin) throws IOException {
 		super(width, height);
 		gpio = GpioFactory.getInstance();
 		this.rstPin = gpio.provisionDigitalOutputPin(rstPin);
 		this.dcPin = gpio.provisionDigitalOutputPin(dcPin);
 
-		try {
-			spi = SpiFactory.getInstance(channel, 8000000);
-		} catch(IOException e) {
-			e.printStackTrace();
-		}
+		spi = SpiFactory.getInstance(channel, 8000000);
 	}
 
 	@Override
