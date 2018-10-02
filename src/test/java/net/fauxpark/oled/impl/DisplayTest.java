@@ -1,8 +1,9 @@
 package net.fauxpark.oled.impl;
 
+import com.pi4j.io.gpio.Pin;
 import com.pi4j.io.gpio.RaspiPin;
 import com.pi4j.io.i2c.I2CBus;
-import net.fauxpark.oled.SSD1306;
+import net.fauxpark.oled.SSDisplay;
 import org.junit.*;
 import org.junit.runners.MethodSorters;
 import org.slf4j.Logger;
@@ -17,7 +18,14 @@ public class DisplayTest {
     private static final Logger logger = LoggerFactory.getLogger(DisplayTest.class);
     public static final int INVERSION_FLIP_SLEEP = 500;
 
-    static SSD1306 ssd1306;
+    public static final int I2C_BUS = I2CBus.BUS_1;
+    public static final int I2C_ADDRESS = 0x3C;
+
+    // public static final Pin RST_PIN = RaspiPin.GPIO_24;
+    public static final Pin RST_PIN = null;
+
+
+    static SSDisplay ssd1306;
 
     static BufferedImage image;
     static Graphics2D graphics;
@@ -30,7 +38,7 @@ public class DisplayTest {
     public static void setUp() {
         logger.info(">> setUp - startup display");
 
-        ssd1306 = new SSD1306I2CImpl(width, height, RaspiPin.GPIO_24, I2CBus.BUS_1, 0x3C);
+        ssd1306 = new SSD1306I2CImpl(width, height, RST_PIN, I2C_BUS, I2C_ADDRESS);
         ssd1306.startup(false);
 
         logger.info("-- headless awt setup");

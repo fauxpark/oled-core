@@ -1,11 +1,11 @@
 package net.fauxpark.oled;
 
 /**
- * A base class for defining implementations of the SSD1306 OLED display.
+ * A base class for defining implementations of the SSDisplay OLED display.
  *
  * @author fauxpark
  */
-public abstract class SSD1306 {
+public abstract class SSDisplay {
 	/**
 	 * A helper class for drawing lines, shapes, text and images.
 	 */
@@ -72,12 +72,12 @@ public abstract class SSD1306 {
 	private int offset;
 
 	/**
-	 * SSD1306 constructor.
+	 * SSDisplay constructor.
 	 *
 	 * @param width The width of the display in pixels.
 	 * @param height The height of the display in pixels.
 	 */
-	public SSD1306(int width, int height) {
+	public SSDisplay(int width, int height) {
 		this.width = width;
 		this.height = height;
 		pages = height / 8;

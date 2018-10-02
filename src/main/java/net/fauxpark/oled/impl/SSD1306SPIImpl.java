@@ -12,14 +12,14 @@ import com.pi4j.io.spi.SpiFactory;
 
 import net.fauxpark.oled.Command;
 import net.fauxpark.oled.Constant;
-import net.fauxpark.oled.SSD1306;
+import net.fauxpark.oled.SSDisplay;
 
 /**
- * A simple SPI driver for the Adafruit SSD1306 OLED display.
+ * A simple SPI driver for the Adafruit SSDisplay OLED display.
  *
  * @author fauxpark
  */
-public class SSD1306SPIImpl extends SSD1306 {
+public class SSD1306SPIImpl extends SSDisplay {
 	/**
 	 * The internal GPIO instance.
 	 */

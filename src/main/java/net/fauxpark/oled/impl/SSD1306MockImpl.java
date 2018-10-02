@@ -2,14 +2,14 @@ package net.fauxpark.oled.impl;
 
 import net.fauxpark.oled.Command;
 import net.fauxpark.oled.Constant;
-import net.fauxpark.oled.SSD1306;
+import net.fauxpark.oled.SSDisplay;
 
 /**
- * A mock SSD1306 driver, for use when testing on platforms other than the Raspberry Pi.
+ * A mock SSDisplay driver, for use when testing on platforms other than the Raspberry Pi.
  *
  * @author fauxpark
  */
-public class SSD1306MockImpl extends SSD1306 {
+public class SSD1306MockImpl extends SSDisplay {
 	/**
 	 * SSD1306MockImpl constructor.
 	 *

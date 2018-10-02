@@ -12,14 +12,18 @@ import com.pi4j.io.i2c.I2CFactory.UnsupportedBusNumberException;
 
 import net.fauxpark.oled.Command;
 import net.fauxpark.oled.Constant;
-import net.fauxpark.oled.SSD1306;
+import net.fauxpark.oled.SSDisplay;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * A simple I<sup>2</sup>C driver for the Adafruit SSD1306 OLED display.
+ * A simple I<sup>2</sup>C driver for the Adafruit SSDisplay OLED display.
  *
  * @author fauxpark
  */
-public class SSD1306I2CImpl extends SSD1306 {
+public class SSD1306I2CImpl extends SSDisplay {
+    private static final Logger logger = LoggerFactory.getLogger(SSD1306I2CImpl.class);
+
     /**
      * The internal GPIO instance.
      */
@@ -28,7 +32,7 @@ public class SSD1306I2CImpl extends SSD1306 {
     /**
      * The GPIO pin corresponding to the RST line on the display.
      */
-    private GpioPinDigitalOutput rstPin;
+    private GpioPinDigitalOutput rstPin = null;
 
     /**
      * The internal I<sup>2</sup>C device.
@@ -45,14 +49,16 @@ public class SSD1306I2CImpl extends SSD1306 {
      *
      * @param width   The width of the display in pixels.
      * @param height  The height of the display in pixels.
-     * @param rstPin  The GPIO pin to use for the RST line.
+     * @param rstPin  The GPIO pin to use for the RST line. - or null if none
      * @param bus     The I<sup>2</sup>C bus to use.
      * @param address The I<sup>2</sup>C address of the display.
      */
     public SSD1306I2CImpl(int width, int height, Pin rstPin, int bus, int address) {
         super(width, height);
         gpio = GpioFactory.getInstance();
-        this.rstPin = gpio.provisionDigitalOutputPin(rstPin);
+        if (rstPin != null) {
+            this.rstPin = gpio.provisionDigitalOutputPin(rstPin);
+        }
 
         try {
             i2c = I2CFactory.getInstance(bus).getDevice(address);
@@ -97,6 +103,11 @@ public class SSD1306I2CImpl extends SSD1306 {
 
     @Override
     public void reset() {
+        if (rstPin == null) {
+            // TODO sw reset possible?!
+            logger.warn("reset - no effect without reset pin");
+            return;
+        }
         try {
             rstPin.setState(true);
             Thread.sleep(1);
