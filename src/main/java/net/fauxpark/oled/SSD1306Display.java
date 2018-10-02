@@ -1,7 +1,6 @@
 package net.fauxpark.oled;
 
 import com.pi4j.io.gpio.Pin;
-import net.fauxpark.oled.impl.SSD1306I2CImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,8 +16,14 @@ public abstract class SSD1306Display extends SSDisplay {
         super(width, height, rstPin);
     }
 
+    /**
+     * Startup specific to 1306
+     *
+     * @param externalVcc Indicates whether the display is being driven by an external power source.
+     */
     @Override
     public void startup(boolean externalVcc) {
+        logger.debug("startup");
         reset();
         setDisplayOn(false);
 
@@ -43,7 +48,6 @@ public abstract class SSD1306Display extends SSDisplay {
         command(Command.SET_PRECHARGE_PERIOD, externalVcc ? 0x22 : 0xF1);
         command(Command.SET_VCOMH_DESELECT, Constant.VCOMH_DESELECT_LEVEL_00);
         command(Command.DISPLAY_ALL_ON_RESUME);
-
 
         super.startup(externalVcc);
     }

@@ -130,6 +130,7 @@ public abstract class SSDisplay {
 
 	/**
 	 * Start the power on procedure for the display.
+     * Generic for SSDisplays
 	 *
 	 * @param externalVcc Indicates whether the display is being driven by an external power source.
 	 */
@@ -262,6 +263,7 @@ public abstract class SSDisplay {
 	 * @param inverted Whether to invert the display or return to normal.
 	 */
 	public void setInverted(boolean inverted) {
+		command(inverted ? Command.INVERT_DISPLAY : Command.NORMAL_DISPLAY);
 		this.inverted = inverted;
 	}
 
@@ -280,6 +282,11 @@ public abstract class SSDisplay {
 	 * @param contrast The contrast to set, from 0 to 255.
 	 */
 	public void setContrast(int contrast) {
+		if (contrast < 0 || contrast > 255) {
+			return;
+		}
+
+		command(Command.SET_CONTRAST, contrast);
 		this.contrast = contrast;
 	}
 
@@ -298,6 +305,7 @@ public abstract class SSDisplay {
 	 * @param offset The number of rows to offset the display by.
 	 */
 	public void setOffset(int offset) {
+		command(Command.SET_DISPLAY_OFFSET, offset);
 		this.offset = offset;
 	}
 
@@ -320,8 +328,9 @@ public abstract class SSDisplay {
 	 *
 	 * @see Constant#SCROLL_STEP_5
 	 */
-	public abstract void scrollHorizontally(boolean direction, int start, int end, int speed);
-
+	public void scrollHorizontally(boolean direction, int start, int end, int speed) {
+		command(direction ? Command.LEFT_HORIZONTAL_SCROLL : Command.RIGHT_HORIZONTAL_SCROLL, Constant.DUMMY_BYTE_00, start, speed, end, Constant.DUMMY_BYTE_00, Constant.DUMMY_BYTE_FF);
+	}
 	/**
 	 * Scroll the display horizontally and vertically.
 	 *
@@ -335,12 +344,15 @@ public abstract class SSDisplay {
 	 *
 	 * @see Constant#SCROLL_STEP_5
 	 */
-	public abstract void scrollDiagonally(boolean direction, int start, int end, int offset, int rows, int speed, int step);
-
+	public void scrollDiagonally(boolean direction, int start, int end, int offset, int rows, int speed, int step) {
+		command(Command.SET_VERTICAL_SCROLL_AREA, offset, rows);
+		command(direction ? Command.VERTICAL_AND_LEFT_HORIZONTAL_SCROLL : Command.VERTICAL_AND_RIGHT_HORIZONTAL_SCROLL, Constant.DUMMY_BYTE_00, start, speed, end, step);
+	}
 	/**
 	 * Start scrolling the display.
 	 */
 	public void startScroll() {
+		command(Command.ACTIVATE_SCROLL);
 		scrolling = true;
 	}
 
@@ -348,14 +360,16 @@ public abstract class SSDisplay {
 	 * Stop scrolling the display.
 	 */
 	public void stopScroll() {
+		command(Command.DEACTIVATE_SCROLL);
 		scrolling = false;
 	}
 
 	/**
 	 * No operation.
 	 */
-	public abstract void noOp();
-
+	public void noOp() {
+		command(Command.NOOP);
+	}
 	/**
 	 * Get the horizontal flip state of the display.
 	 *
@@ -371,6 +385,14 @@ public abstract class SSDisplay {
 	 * @param hFlipped Whether to flip the display or return to normal.
 	 */
 	public void setHFlipped(boolean hFlipped) {
+		if(hFlipped) {
+			command(Command.SET_SEGMENT_REMAP);
+		} else {
+			command(Command.SET_SEGMENT_REMAP_REVERSE);
+		}
+
+		// Horizontal flipping is not immediate
+		display();
 		this.hFlipped = hFlipped;
 	}
 
@@ -389,6 +411,11 @@ public abstract class SSDisplay {
 	 * @param vFlipped Whether to flip the display or return to normal.
 	 */
 	public void setVFlipped(boolean vFlipped) {
+		if (vFlipped) {
+			command(Command.SET_COM_SCAN_INC);
+		} else {
+			command(Command.SET_COM_SCAN_DEC);
+		}
 		this.vFlipped = vFlipped;
 	}
 
