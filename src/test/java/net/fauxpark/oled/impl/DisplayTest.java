@@ -1,8 +1,10 @@
 package net.fauxpark.oled.impl;
 
 import com.pi4j.io.gpio.Pin;
-import com.pi4j.io.gpio.RaspiPin;
 import com.pi4j.io.i2c.I2CBus;
+import net.fauxpark.oled.conn.DisplayConnection;
+import net.fauxpark.oled.conn.DisplayConnectionI2C;
+import net.fauxpark.oled.SSD1306Display;
 import net.fauxpark.oled.SSDisplay;
 import org.junit.*;
 import org.junit.runners.MethodSorters;
@@ -12,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
+import java.io.IOException;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class DisplayTest {
@@ -25,6 +28,7 @@ public class DisplayTest {
     public static final Pin RST_PIN = null;
 
 
+    static DisplayConnection dspConn;
     static SSDisplay ssd1306;
 
     static BufferedImage image;
@@ -35,10 +39,11 @@ public class DisplayTest {
     static final int height = 32;
 
     @BeforeClass
-    public static void setUp() {
+    public static void setUp() throws IOException {
         logger.info(">> setUp - startup display");
 
-        ssd1306 = new SSD1306I2CImpl(width, height, RST_PIN, I2C_BUS, I2C_ADDRESS);
+        dspConn = new DisplayConnectionI2C(null, I2C_BUS, I2C_ADDRESS, RST_PIN);
+        ssd1306 = new SSD1306Display(dspConn, width, height);
         ssd1306.startup(false);
 
         logger.info("-- headless awt setup");
@@ -50,8 +55,9 @@ public class DisplayTest {
 
     @AfterClass
     public static void shutdown() {
-        logger.info("-- turn off");
-        ssd1306.setDisplayOn(false);
+        logger.info("-- shutdown");
+        ssd1306.shutdown();
+        logger.info("<< shutdown");
     }
 
     @Test
@@ -108,7 +114,7 @@ public class DisplayTest {
         // (helping with problem of bitmask interpretation)
         boolean displayInverted = false;
 
-        for (int i = 0; i < 9; i++) {
+        for (int i = 0; i < 15; i++) {
             logger.info("{} - inverted: {}", i, displayInverted );
             ssd1306.setInverted(displayInverted);
             displayInverted = ! displayInverted;

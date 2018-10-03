@@ -1,9 +1,7 @@
 package net.fauxpark.oled;
 
-import com.pi4j.io.gpio.GpioController;
-import com.pi4j.io.gpio.GpioFactory;
-import com.pi4j.io.gpio.GpioPinDigitalOutput;
 import com.pi4j.io.gpio.Pin;
+import net.fauxpark.oled.conn.DisplayConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,15 +13,7 @@ import org.slf4j.LoggerFactory;
 public abstract class SSDisplay {
 	private static final Logger logger = LoggerFactory.getLogger(SSDisplay.class);
 
-	/**
-	 * The internal GPIO instance.
-	 */
-	private GpioController gpio;
-
-	/**
-	 * The GPIO pin corresponding to the RST line on the display.
-	 */
-	private GpioPinDigitalOutput rstPin;
+	protected DisplayConnection dspConn;
 
 
 
@@ -99,26 +89,21 @@ public abstract class SSDisplay {
 	 * @param width The width of the display in pixels.
 	 * @param height The height of the display in pixels.
 	 */
-	public SSDisplay(int width, int height) {
-		init(width, height, null);
+	public SSDisplay(DisplayConnection dspConn, int width, int height) {
+		init(dspConn, width, height, null);
 	}
 
-	public SSDisplay(int width, int height, Pin rstPin) {
-		init(width, height, rstPin);
+	public SSDisplay(DisplayConnection dspConn, int width, int height, Pin rstPin) {
+		init(dspConn, width, height, rstPin);
 	}
 
-	private void init(int width, int height, Pin rstPin) {
+	private void init(DisplayConnection dspConn, int width, int height, Pin rstPin) {
+	    this.dspConn = dspConn;
 		this.width = width;
 		this.height = height;
 
 		pages = height / 8;
 		buffer = new byte[width * pages];
-
-		gpio = GpioFactory.getInstance();
-
-		if (rstPin != null) {
-			this.rstPin = getGpio().provisionDigitalOutputPin(rstPin);
-		}
 	}
 
 	/**
@@ -161,27 +146,16 @@ public abstract class SSDisplay {
 
 		setDisplayOn(false);
 
-		gpio.shutdown();
+		dspConn.shutdown();
 	}
 
 	/**
 	 * Reset the display.
 	 */
 	public void reset() {
-		if (rstPin == null) {
-			// TODO sw reset possible?!
-			logger.warn("reset - no effect without reset pin");
-			return;
-		}
-		try {
-			rstPin.setState(true);
-			Thread.sleep(1);
-			rstPin.setState(false);
-			Thread.sleep(10);
-			rstPin.setState(true);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
+        // TODO sw reset possible?!
+
+        dspConn.reset();
 	}
 	/**
 	 * Clear the buffer.
@@ -196,9 +170,9 @@ public abstract class SSDisplay {
 	 * Send the buffer to the display.
 	 */
 	public synchronized void display() {
-		command(Command.SET_COLUMN_ADDRESS, 0, width - 1);
-		command(Command.SET_PAGE_ADDRESS, 0, pages - 1);
-		data(buffer);
+		dspConn.command(Command.SET_COLUMN_ADDRESS, 0, width - 1);
+		dspConn.command(Command.SET_PAGE_ADDRESS, 0, pages - 1);
+		dspConn.data(buffer);
 
 		// Jump start scrolling again if new data is written while enabled
 		if(isScrolling()) {
@@ -240,9 +214,9 @@ public abstract class SSDisplay {
 	 */
 	public void setDisplayOn(boolean displayOn) {
 		if (displayOn) {
-			command(Command.DISPLAY_ON);
+			dspConn.command(Command.DISPLAY_ON);
 		} else {
-			command(Command.DISPLAY_OFF);
+			dspConn.command(Command.DISPLAY_OFF);
 		}
 
 		this.displayOn = displayOn;
@@ -263,7 +237,7 @@ public abstract class SSDisplay {
 	 * @param inverted Whether to invert the display or return to normal.
 	 */
 	public void setInverted(boolean inverted) {
-		command(inverted ? Command.INVERT_DISPLAY : Command.NORMAL_DISPLAY);
+		dspConn.command(inverted ? Command.INVERT_DISPLAY : Command.NORMAL_DISPLAY);
 		this.inverted = inverted;
 	}
 
@@ -286,7 +260,7 @@ public abstract class SSDisplay {
 			return;
 		}
 
-		command(Command.SET_CONTRAST, contrast);
+		dspConn.command(Command.SET_CONTRAST, contrast);
 		this.contrast = contrast;
 	}
 
@@ -305,7 +279,7 @@ public abstract class SSDisplay {
 	 * @param offset The number of rows to offset the display by.
 	 */
 	public void setOffset(int offset) {
-		command(Command.SET_DISPLAY_OFFSET, offset);
+		dspConn.command(Command.SET_DISPLAY_OFFSET, offset);
 		this.offset = offset;
 	}
 
@@ -329,7 +303,7 @@ public abstract class SSDisplay {
 	 * @see Constant#SCROLL_STEP_5
 	 */
 	public void scrollHorizontally(boolean direction, int start, int end, int speed) {
-		command(direction ? Command.LEFT_HORIZONTAL_SCROLL : Command.RIGHT_HORIZONTAL_SCROLL, Constant.DUMMY_BYTE_00, start, speed, end, Constant.DUMMY_BYTE_00, Constant.DUMMY_BYTE_FF);
+		dspConn.command(direction ? Command.LEFT_HORIZONTAL_SCROLL : Command.RIGHT_HORIZONTAL_SCROLL, Constant.DUMMY_BYTE_00, start, speed, end, Constant.DUMMY_BYTE_00, Constant.DUMMY_BYTE_FF);
 	}
 	/**
 	 * Scroll the display horizontally and vertically.
@@ -345,14 +319,14 @@ public abstract class SSDisplay {
 	 * @see Constant#SCROLL_STEP_5
 	 */
 	public void scrollDiagonally(boolean direction, int start, int end, int offset, int rows, int speed, int step) {
-		command(Command.SET_VERTICAL_SCROLL_AREA, offset, rows);
-		command(direction ? Command.VERTICAL_AND_LEFT_HORIZONTAL_SCROLL : Command.VERTICAL_AND_RIGHT_HORIZONTAL_SCROLL, Constant.DUMMY_BYTE_00, start, speed, end, step);
+		dspConn.command(Command.SET_VERTICAL_SCROLL_AREA, offset, rows);
+		dspConn.command(direction ? Command.VERTICAL_AND_LEFT_HORIZONTAL_SCROLL : Command.VERTICAL_AND_RIGHT_HORIZONTAL_SCROLL, Constant.DUMMY_BYTE_00, start, speed, end, step);
 	}
 	/**
 	 * Start scrolling the display.
 	 */
 	public void startScroll() {
-		command(Command.ACTIVATE_SCROLL);
+		dspConn.command(Command.ACTIVATE_SCROLL);
 		scrolling = true;
 	}
 
@@ -360,7 +334,7 @@ public abstract class SSDisplay {
 	 * Stop scrolling the display.
 	 */
 	public void stopScroll() {
-		command(Command.DEACTIVATE_SCROLL);
+		dspConn.command(Command.DEACTIVATE_SCROLL);
 		scrolling = false;
 	}
 
@@ -368,7 +342,7 @@ public abstract class SSDisplay {
 	 * No operation.
 	 */
 	public void noOp() {
-		command(Command.NOOP);
+		dspConn.command(Command.NOOP);
 	}
 	/**
 	 * Get the horizontal flip state of the display.
@@ -386,9 +360,9 @@ public abstract class SSDisplay {
 	 */
 	public void setHFlipped(boolean hFlipped) {
 		if(hFlipped) {
-			command(Command.SET_SEGMENT_REMAP);
+			dspConn.command(Command.SET_SEGMENT_REMAP);
 		} else {
-			command(Command.SET_SEGMENT_REMAP_REVERSE);
+			dspConn.command(Command.SET_SEGMENT_REMAP_REVERSE);
 		}
 
 		// Horizontal flipping is not immediate
@@ -412,9 +386,9 @@ public abstract class SSDisplay {
 	 */
 	public void setVFlipped(boolean vFlipped) {
 		if (vFlipped) {
-			command(Command.SET_COM_SCAN_INC);
+			dspConn.command(Command.SET_COM_SCAN_INC);
 		} else {
-			command(Command.SET_COM_SCAN_DEC);
+			dspConn.command(Command.SET_COM_SCAN_DEC);
 		}
 		this.vFlipped = vFlipped;
 	}
@@ -477,19 +451,19 @@ public abstract class SSDisplay {
 	}
 
 	/**
-	 * Send a command to the display.
+	 * Send a dspConn.command to the display.
 	 *
-	 * @param command The command to send.
-	 * @param params Any parameters the command requires.
+	 * @param dspConn.command The dspConn.command to send.
+	 * @param params Any parameters the dspConn.command requires.
 	 */
-	public abstract void command(int command, int... params);
+	//public abstract void dspConn.command(int dspConn.command, int... params);
 
 	/**
 	 * Send pixel data to the display.
 	 *
 	 * @param data The data to send.
 	 */
-	public abstract void data(byte[] data);
+	//public abstract void dspConn.data(byte[] data);
 
 	/**
 	 * Get the Graphics instance, creating it if necessary.
@@ -505,11 +479,11 @@ public abstract class SSDisplay {
 		return graphics;
 	}
 
-	public GpioController getGpio() {
+	/*public GpioController getGpio() {
 		return gpio;
 	}
 
 	public void setGpio(GpioController gpio) {
 		this.gpio = gpio;
-	}
+	}*/
 }
