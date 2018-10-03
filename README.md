@@ -3,13 +3,16 @@
 This is a driver for Solomon Systech Displays (SSD1306, SSD1327 - f.e. [Adafruit SSD1306 OLED display](https://www.adafruit.com/categories/98) and others) on the Raspberry Pi, written (almost) completely in Java.
 It makes use of the [Pi4J](https://github.com/Pi4J/pi4j) library, which does all the fiddly bits in native code to operate the GPIO pins and drive the SPI and I<sup>2</sup>C interfaces.
 
-The aim of this project is to abstract away the low-level aspects of the SSD1306 and focus on manipulating the contents of the screen through a very simple API.
+The aim of this project is to abstract away the low-level aspects of the SSD and focus on manipulating the contents of the screen through a very simple API.
 
 ### Display support
 
-* SSD1306 working SPI and I2C
-* SSD1327 (128px * 128px * 4bit grey) in progress
-* other types should be easy to add if pixel-bitsize is the same
+| Device                              | state                |
+|-------------------------------------|----------------------|
+| SSD1306                             | working SPI and I2C  |
+| SSD1327 (128px * 128px * 4bit grey) | in progress          |
+
+Other types should be easy to add if pixel-bitsize is the same
 
 ## GPIO Pinout
 
@@ -21,7 +24,7 @@ The pinout for the Raspberry Pi GPIO header is as follows:
 | Voltage In   | 1                   | 1                             |
 | 3v3          | N/C                 | N/C                           |
 | Chip Select  | 24 (CS0) / 26 (CS1) | N/C                           |
-| Reset        | 8 (GPIO_15) / Any   | 8 (GPIO_15) / Any             |
+| Reset        | 8 (GPIO_15) / Any   | 8 (GPIO_15) / Any (or N/C)    |
 | Data/Command | 10 (GPIO_16) / Any  | N/C (0x3D) / GND (0x3C)       |
 | Clock        | 23                  | 5                             |
 | Data         | 19                  | 3                             |
