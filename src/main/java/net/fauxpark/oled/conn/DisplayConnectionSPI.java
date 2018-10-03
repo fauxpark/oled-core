@@ -6,6 +6,7 @@ import com.pi4j.io.gpio.Pin;
 import com.pi4j.io.spi.SpiChannel;
 import com.pi4j.io.spi.SpiDevice;
 import com.pi4j.io.spi.SpiFactory;
+import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils;
 
 import java.io.IOException;
 
@@ -29,7 +30,7 @@ public class DisplayConnectionSPI extends DisplayConnection {
      * minimal constructor
      * @param spiChannel
      */
-    public DisplayConnectionSPI(SpiChannel spiChannel) {
+    public DisplayConnectionSPI(SpiChannel spiChannel) throws IOException {
         this.spiChannel = spiChannel;
         init();
     }
@@ -43,7 +44,7 @@ public class DisplayConnectionSPI extends DisplayConnection {
      * @param rstPin
      * @param dcPin
      */
-    public DisplayConnectionSPI(GpioController gpioInstance, SpiChannel spiChannel, int spiSpeed, Pin rstPin, Pin dcPin) {
+    public DisplayConnectionSPI(GpioController gpioInstance, SpiChannel spiChannel, int spiSpeed, Pin rstPin, Pin dcPin) throws IOException {
         super(gpioInstance, rstPin);
         this.spiChannel = spiChannel;
         this.spiSpeed = spiSpeed;

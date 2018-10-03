@@ -32,12 +32,12 @@ public class DisplayConnectionI2C extends DisplayConnection {
     /**
      * minimal constructor - will use DEFAULT_I2C_BUS_ID and DEFAULT_I2C_ADDRESS
      */
-    public DisplayConnectionI2C() {
+    public DisplayConnectionI2C() throws IOException {
         init();
     }
 
 
-    public DisplayConnectionI2C(int i2cBusId, int i2cAddress) {
+    public DisplayConnectionI2C(int i2cBusId, int i2cAddress) throws IOException {
         this.i2cBusId = i2cBusId;
         this.i2cAddress = i2cAddress;
         init();
@@ -51,7 +51,7 @@ public class DisplayConnectionI2C extends DisplayConnection {
      * @param i2cAddress
      * @param rstPin
      */
-    public DisplayConnectionI2C(GpioController gpioInstance, int i2cBusId, int i2cAddress, Pin rstPin) {
+    public DisplayConnectionI2C(GpioController gpioInstance, int i2cBusId, int i2cAddress, Pin rstPin) throws IOException {
         super(gpioInstance, rstPin);
         this.i2cBusId = i2cBusId;
         this.i2cAddress = i2cAddress;
