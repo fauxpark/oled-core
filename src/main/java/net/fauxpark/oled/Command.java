@@ -59,15 +59,6 @@ public class Command {
 	 */
 	public static final int SET_MEMORY_MODE                      = 0x20;
 
-	/**
-	 * Set the column start and end address of the display.
-	 */
-	public static final int SET_COLUMN_ADDRESS                   = 0x21;
-
-	/**
-	 * Set the page start and end address of the display.
-	 */
-	public static final int SET_PAGE_ADDRESS                     = 0x22;
 
 	/**
 	 * Set the display to scroll to the right.
@@ -232,17 +223,7 @@ public class Command {
 	 */
 	public static final int DISPLAY_ON                           = 0xAF;
 
-	/**
-	 * Set the page start address for page addressing mode.
-	 */
-	public static final int SET_PAGE_START_ADDR_0                = 0xB0;
-	public static final int SET_PAGE_START_ADDR_1                = 0xB1;
-	public static final int SET_PAGE_START_ADDR_2                = 0xB2;
-	public static final int SET_PAGE_START_ADDR_3                = 0xB3;
-	public static final int SET_PAGE_START_ADDR_4                = 0xB4;
-	public static final int SET_PAGE_START_ADDR_5                = 0xB5;
-	public static final int SET_PAGE_START_ADDR_6                = 0xB6;
-	public static final int SET_PAGE_START_ADDR_7                = 0xB7;
+
 
 	/**
 	 * Set the row output scan direction from COM0 to COM63.
