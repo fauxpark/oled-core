@@ -72,6 +72,12 @@ public abstract class DisplayConnection {
         }
     }
 
+    @Override
+    public String toString() {
+        return this.getClass().getSimpleName() + "{" +
+                "selfInstanciatedGpioController=" + selfInstanciatedGpioController +
+                '}';
+    }
 
     abstract public void command(int command, int... params);
 

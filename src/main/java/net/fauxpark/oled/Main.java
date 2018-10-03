@@ -57,7 +57,7 @@ public class Main {
 
         // start selected routine
         if ("dspTest".equals(routine)) {
-            DisplayTest dspTest = new DisplayTest();
+            DisplayTest dspTest = new DisplayTest(display);
             dspTest.run();
         } else {
             System.err.println("unknown routine type: " + routine);

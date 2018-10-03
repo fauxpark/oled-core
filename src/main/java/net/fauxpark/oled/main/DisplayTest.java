@@ -25,7 +25,6 @@ public class DisplayTest {
     public static final Pin RST_PIN = null;
 
 
-    static DisplayConnection dspConn;
     static SSDisplay display;
 
     static BufferedImage image;
@@ -35,6 +34,9 @@ public class DisplayTest {
     static final int width = 128;
     static final int height = 32;
 
+    public DisplayTest(SSDisplay display) {
+        this.display = display;
+    }
 
     public void run() throws Exception {
         setUp();
@@ -45,9 +47,8 @@ public class DisplayTest {
 
     public void setUp() throws IOException {
         logger.info(">> setUp - startup display");
+        logger.info("   type: {} -connected-via-> {}", display, display.getDspConn());
 
-        dspConn = new DisplayConnectionI2C(null, I2C_BUS, I2C_ADDRESS, RST_PIN);
-        display = new SSD1306Display(dspConn, width, height);
         display.startup(false);
 
         logger.info("-- headless awt setup");

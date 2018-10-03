@@ -3,6 +3,7 @@ package net.fauxpark.oled.conn;
 import com.pi4j.io.gpio.GpioController;
 import com.pi4j.io.gpio.GpioPinDigitalOutput;
 import com.pi4j.io.gpio.Pin;
+import com.pi4j.io.gpio.RaspiPin;
 import com.pi4j.io.spi.SpiChannel;
 import com.pi4j.io.spi.SpiDevice;
 import com.pi4j.io.spi.SpiFactory;
@@ -28,8 +29,9 @@ public class DisplayConnectionSPI extends DisplayConnection {
     private GpioPinDigitalOutput dcOutputPin;
     private Pin dcPin;
 
-    public DisplayConnectionSPI() {
-
+    public DisplayConnectionSPI() throws IOException {
+        this.dcPin = RaspiPin.GPIO_16;
+        init();
     }
 
     /**
@@ -60,13 +62,17 @@ public class DisplayConnectionSPI extends DisplayConnection {
 
 
     protected void init() throws IOException {
+        if (dcPin == null) {
+            throw new IOException("need dcPin specification");
+        } else {
+            this.dcOutputPin = gpio.provisionDigitalOutputPin(dcPin);
+        }
+
         if (spiChannel == null) {
             spiChannel = SpiChannel.getByNumber(0);
         }
         this.spi = SpiFactory.getInstance(spiChannel, spiSpeed);
-        if (dcPin != null) {
-            this.dcOutputPin = gpio.provisionDigitalOutputPin(dcPin);
-        }
+
         logger.debug("initialized spiChannel {} with dcPin {}", spiChannel, dcPin);
     }
 

@@ -479,6 +479,10 @@ public abstract class SSDisplay {
 		return graphics;
 	}
 
+	public DisplayConnection getDspConn() {
+		return dspConn;
+	}
+
 	/*public GpioController getGpio() {
 		return gpio;
 	}
@@ -486,4 +490,13 @@ public abstract class SSDisplay {
 	public void setGpio(GpioController gpio) {
 		this.gpio = gpio;
 	}*/
+
+	@Override
+	public String toString() {
+		return this.getClass().getSimpleName() + "{" +
+				"width=" + width +
+				", height=" + height +
+				", pages=" + pages +
+				'}';
+	}
 }
