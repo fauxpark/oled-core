@@ -31,7 +31,31 @@ The pinout for the Raspberry Pi GPIO header is as follows:
 | Clock        | 23                  | 5                             |
 | Data         | 19                  | 3                             |
 
-## Getting Started
+## Getting Started 
+
+### Start display test on RPi
+Compile and show valid options 
+```bash
+# mvn compile
+# ./run.sh 
+```
+will (/should) display
+```
+assume classes are already build (with f.e. maven in target/classes)
+usage:
+        run.{sh|bat} RoutineName DisplayType [ConnectionType]
+
+example:        run.sh dspTest SSD1327
+Routine:        dspTest
+DisplayType:    DSP1306_128_64 | SSD1327
+ConnectionType: I2C | SPI - default is: I2C
+```
+start for example with
+```bash
+# ./run.sh dspTest SSD1327 I2C
+```
+
+### Java
 
 To set up the display, simply create a new `SSD1306` object, like so:
 
