@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
-public class DisplayConnectionSPI extends DisplayConnection {
+public class DisplayConnectionSPI extends DisplayConnectionGPIO {
     private static final Logger logger = LoggerFactory.getLogger(DisplayConnectionSPI.class);
     public static final int DEFAULT_SPI_SPEED = 8000000;
 
@@ -104,5 +104,27 @@ public class DisplayConnectionSPI extends DisplayConnection {
         } catch(IOException e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void data(byte[] data, int start, int len) {
+        dcOutputPin.setState(true);
+
+        try {
+            spi.write(data, start, len);
+        } catch(IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    @Override
+    public String toString() {
+        return "DisplayConnectionSPI{" +
+                "spiChannel=" + spiChannel +
+                ", spiSpeed=" + spiSpeed +
+                ", rstPin=" + rstPin +
+                ", dcPin=" + dcPin +
+                '}';
     }
 }

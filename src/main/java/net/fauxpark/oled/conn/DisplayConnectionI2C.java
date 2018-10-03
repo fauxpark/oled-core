@@ -4,12 +4,13 @@ import com.pi4j.io.gpio.GpioController;
 import com.pi4j.io.gpio.Pin;
 import com.pi4j.io.i2c.I2CDevice;
 import com.pi4j.io.i2c.I2CFactory;
+import net.fauxpark.oled.misc.HexConversionHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
-public class DisplayConnectionI2C extends DisplayConnection {
+public class DisplayConnectionI2C extends DisplayConnectionGPIO {
     private static final Logger logger = LoggerFactory.getLogger(DisplayConnectionI2C.class);
 
     /**
@@ -102,7 +103,38 @@ public class DisplayConnectionI2C extends DisplayConnection {
         try {
             i2c.write(dataBytes);
         } catch (IOException e) {
+            logger.error("Exception on write: {}", e.getMessage());
+            logger.error("\tdataBytes: {} bytes", dataBytes.length);
+            logger.error("\tdata: {} bytes", HexConversionHelper.bytesToHex(data));
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void data(byte[] data, int start, int len) {
+        byte[] dataBytes = new byte[data.length + 1];
+        dataBytes[0] = (byte) (1 << DC_BIT);
+
+        for (int i = start; i < start + len; i++) {
+            dataBytes[i + 1] = data[i];
+        }
+
+        try {
+            i2c.write(dataBytes);
+        } catch (IOException e) {
+            logger.error("Exception on write: {}", e.getMessage());
+            logger.error("\tdataBytes: {} bytes", dataBytes.length);
+            logger.error("\tdata: {} bytes", HexConversionHelper.bytesToHex(data));
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "DisplayConnectionI2C{" +
+                "i2cBusId=" + i2cBusId +
+                ", i2cAddress=" + i2cAddress +
+                ", rstPin=" + rstPin +
+                '}';
     }
 }

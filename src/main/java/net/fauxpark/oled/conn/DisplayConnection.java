@@ -1,85 +1,48 @@
 package net.fauxpark.oled.conn;
 
-import com.pi4j.io.gpio.GpioController;
-import com.pi4j.io.gpio.GpioFactory;
-import com.pi4j.io.gpio.GpioPinDigitalOutput;
-import com.pi4j.io.gpio.Pin;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+
+/**
+ * skeleton of basic DisplayConnection with no reference to GPIO / PI4J
+ *
+ * useful for debugging without PI4J
+ */
 public abstract class DisplayConnection {
     private static final Logger logger = LoggerFactory.getLogger(DisplayConnection.class);
 
-
     /**
-     * The internal GPIO instance.
+     * sends a command
+     *
+     * @param command
+     * @param params
      */
-    protected GpioController gpio;
-
-    boolean selfInstanciatedGpioController = false;
-
+    abstract public void command(int command, int... params) throws IOException ;
 
     /**
-     * The GPIO pin corresponding to the RST line on the display.
+     * sends data
+     *
+     * @param data
      */
-    private GpioPinDigitalOutput rstOutputPin;
-    private Pin rstPin;
+    abstract public void data(byte[] data) throws IOException;
 
-
-    public DisplayConnection() {
-        init();
-    }
-
-    public DisplayConnection(GpioController gpioInstance, Pin rstPin) {
-        this.gpio = gpioInstance;
-        this.rstPin = rstPin;
-
-        init();
-    }
-
-    private void init() {
-        if (gpio == null) {
-            gpio = GpioFactory.getInstance();
-            selfInstanciatedGpioController = true;
-        }
-        if (rstPin != null) {
-            this.rstOutputPin = gpio.provisionDigitalOutputPin(rstPin);
-        }
-    }
+    /** outputs parts of array */
+    abstract public void data(byte[] data, int start, int len) throws IOException;
 
     /**
-     * HW-Reset the display.
+     * reset the display - should be overridden
      */
     public void reset() {
-        if (rstPin == null) {
-            logger.info("reset - no effect without reset pin");
-            return;
-        }
-        try {
-            rstOutputPin.setState(true);
-            Thread.sleep(1);
-            rstOutputPin.setState(false);
-            Thread.sleep(10);
-            rstOutputPin.setState(true);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        logger.warn("no reset implementation");
     }
 
+    /**
+     * shutdown display (and IO?) - should be overridden
+     */
     public void shutdown() {
-        if (selfInstanciatedGpioController) {
-            gpio.shutdown();
-        }
+        logger.warn("no shutdown implementation");
     }
-
-    @Override
-    public String toString() {
-        return this.getClass().getSimpleName() + "{" +
-                "selfInstanciatedGpioController=" + selfInstanciatedGpioController +
-                '}';
-    }
-
-    abstract public void command(int command, int... params);
-
-    abstract public void data(byte[] data);
 }
