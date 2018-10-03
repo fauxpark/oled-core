@@ -67,18 +67,18 @@ public class DisplayTest {
 
     public void testFilling() throws InterruptedException, IOException {
         logger.info("testFilling");
-        for (int fillColl=0; fillColl<display.getWidth(); fillColl++) {
-            logger.info("fill col: {}", fillColl);
-            for (int r=0; r<display.getHeight(); r++) {
-                display.setPixel(fillColl, r, true);
+        boolean inverted = false;
+        for (int fillRow=0; fillRow<display.getHeight(); fillRow++) {
+            logger.info("fill col: {}", fillRow);
+            display.setInverted(inverted);
+            inverted = ! inverted;
+
+            for (int c=0; c<display.getWidth(); c++) {
+                display.setPixel(c, fillRow, true);
             }
             display.display();
             Thread.sleep(20);
 
-            if (fillColl == width / 2) {
-                logger.info("invert now");
-                display.setInverted(true);
-            }
         }
         logger.info("reset inverstion");
         display.setInverted(false);

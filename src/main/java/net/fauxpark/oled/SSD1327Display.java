@@ -13,6 +13,10 @@ public class SSD1327Display extends SSDisplay {
     public static final int HEIGHT = 128;
     public static final int COLOR_BITS_PER_PIXEL = 4;
 
+    public static int LOWER_NIBBLE_MASK = 0x0F;
+    public static int HIGHER_NIBBLE_MASK = 0xF0;
+
+
 
     public SSD1327Display(DisplayConnection dspConn) {
         super(dspConn, WIDTH, HEIGHT);
@@ -69,10 +73,14 @@ public class SSD1327Display extends SSDisplay {
             return false;
         }
 
+        int arrayElement = x / 2 + y * width;
+        int nibble = x & 1;
+        int shiftedNibble =  (0xF << nibble * 4);
+
         if(on) {
-            buffer[x + (y / 8) * width] |= (1 << (y & 7));
+            buffer[arrayElement] |= shiftedNibble;
         } else {
-            buffer[x + (y / 8) * width] &= ~(1 << (y & 7));
+            buffer[arrayElement] &= ~ shiftedNibble;
         }
 
         return true;
@@ -98,11 +106,11 @@ public class SSD1327Display extends SSDisplay {
     @Override
     public synchronized void display() throws IOException {
         int rowSize = width * getColorBitsPerPixel() / 8;
-        byte [] rowData = new byte[rowSize];
+        //byte [] rowData = new byte[rowSize];
         for (int row = 0; row<height; row++) {
             int rowStart = row * rowSize;
-            int rowEnd = (row + 1) * rowSize - 1;
-
+            //int rowEnd = (row + 1) * rowSize - 1;
+            dspConn.data(buffer, rowStart, rowSize);
         }
     }
 }
