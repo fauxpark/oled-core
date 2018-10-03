@@ -6,10 +6,13 @@ import com.pi4j.io.gpio.Pin;
 import com.pi4j.io.spi.SpiChannel;
 import com.pi4j.io.spi.SpiDevice;
 import com.pi4j.io.spi.SpiFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
 public class DisplayConnectionSPI extends DisplayConnection {
+    private static final Logger logger = LoggerFactory.getLogger(DisplayConnectionSPI.class);
     public static final int DEFAULT_SPI_SPEED = 8000000;
 
     /**
@@ -24,6 +27,10 @@ public class DisplayConnectionSPI extends DisplayConnection {
 
     private GpioPinDigitalOutput dcOutputPin;
     private Pin dcPin;
+
+    public DisplayConnectionSPI() {
+
+    }
 
     /**
      * minimal constructor
@@ -53,10 +60,14 @@ public class DisplayConnectionSPI extends DisplayConnection {
 
 
     protected void init() throws IOException {
+        if (spiChannel == null) {
+            spiChannel = SpiChannel.getByNumber(0);
+        }
         this.spi = SpiFactory.getInstance(spiChannel, spiSpeed);
         if (dcPin != null) {
             this.dcOutputPin = gpio.provisionDigitalOutputPin(dcPin);
         }
+        logger.debug("initialized spiChannel {} with dcPin {}", spiChannel, dcPin);
     }
 
     @Override

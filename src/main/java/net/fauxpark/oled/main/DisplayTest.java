@@ -1,4 +1,4 @@
-package net.fauxpark.oled.impl;
+package net.fauxpark.oled.main;
 
 import com.pi4j.io.gpio.Pin;
 import com.pi4j.io.i2c.I2CBus;
@@ -6,8 +6,6 @@ import net.fauxpark.oled.conn.DisplayConnection;
 import net.fauxpark.oled.conn.DisplayConnectionI2C;
 import net.fauxpark.oled.SSD1306Display;
 import net.fauxpark.oled.SSDisplay;
-import org.junit.*;
-import org.junit.runners.MethodSorters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,7 +14,6 @@ import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
 import java.io.IOException;
 
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class DisplayTest {
     private static final Logger logger = LoggerFactory.getLogger(DisplayTest.class);
     public static final int INVERSION_FLIP_SLEEP = 500;
@@ -29,7 +26,7 @@ public class DisplayTest {
 
 
     static DisplayConnection dspConn;
-    static SSDisplay ssd1306;
+    static SSDisplay display;
 
     static BufferedImage image;
     static Graphics2D graphics;
@@ -38,13 +35,20 @@ public class DisplayTest {
     static final int width = 128;
     static final int height = 32;
 
-    @BeforeClass
-    public static void setUp() throws IOException {
+
+    public void run() throws Exception {
+        setUp();
+        testDrawing();
+        testInversionFlipping();
+        shutdown();
+    }
+
+    public void setUp() throws IOException {
         logger.info(">> setUp - startup display");
 
         dspConn = new DisplayConnectionI2C(null, I2C_BUS, I2C_ADDRESS, RST_PIN);
-        ssd1306 = new SSD1306Display(dspConn, width, height);
-        ssd1306.startup(false);
+        display = new SSD1306Display(dspConn, width, height);
+        display.startup(false);
 
         logger.info("-- headless awt setup");
         image = new BufferedImage(width, height, BufferedImage.TYPE_BYTE_BINARY);
@@ -53,14 +57,12 @@ public class DisplayTest {
         logger.debug("<< setUp");
     }
 
-    @AfterClass
-    public static void shutdown() {
+    public void shutdown() {
         logger.info("-- shutdown");
-        ssd1306.shutdown();
+        display.shutdown();
         logger.info("<< shutdown");
     }
 
-    @Test
     public void testDrawing() {
         logger.debug(">> testDrawing");
 
@@ -98,17 +100,16 @@ public class DisplayTest {
         Raster r = image.getRaster();
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
-                ssd1306.setPixel(x, y, (r.getSample(x, y, 0) > 0));
+                display.setPixel(x, y, (r.getSample(x, y, 0) > 0));
             }
         }
 
         logger.debug("-- display");
-        ssd1306.display();
+        display.display();
 
         logger.debug("<< testDrawing");
     }
 
-    @Test
     public void testInversionFlipping() throws Exception{
         // flip inversion some times
         // (helping with problem of bitmask interpretation)
@@ -116,7 +117,7 @@ public class DisplayTest {
 
         for (int i = 0; i < 15; i++) {
             logger.info("{} - inverted: {}", i, displayInverted );
-            ssd1306.setInverted(displayInverted);
+            display.setInverted(displayInverted);
             displayInverted = ! displayInverted;
             Thread.sleep(INVERSION_FLIP_SLEEP);
         }

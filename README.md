@@ -96,6 +96,13 @@ In addition, it is possible to create your own character sets by implementing `F
 
 ### Credits
 
-Some of this code has been borrowed from [py-gaugette](https://github.com/guyc/py-gaugette), [pi-ssd1306-java](https://github.com/ondryaso/pi-ssd1306-java), and [raspberry-pi4j-samples](https://github.com/OlivierLD/raspberry-pi4j-samples/).
+Some of this code has been borrowed from 
+* [py-gaugette](https://github.com/guyc/py-gaugette)
+* [pi-ssd1306-java](https://github.com/ondryaso/pi-ssd1306-java)
+* [raspberry-pi4j-samples](https://github.com/OlivierLD/raspberry-pi4j-samples/)
+
+Essential basis from
+* [PI4J](http://pi4j.com/)
+
 
 The glyph data for the CP437 character set has been modified somewhat but appears to have originated from the [Adafruit GFX Library](https://github.com/adafruit/Adafruit-GFX-Library).
