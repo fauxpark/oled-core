@@ -2,6 +2,7 @@ package net.fauxpark.oled;
 
 import net.fauxpark.oled.conn.DisplayConnection;
 import net.fauxpark.oled.conn.DisplayConnectionI2C;
+import net.fauxpark.oled.conn.DisplayConnectionMock;
 import net.fauxpark.oled.conn.DisplayConnectionSPI;
 import net.fauxpark.oled.main.DisplayTest;
 import org.slf4j.Logger;
@@ -38,6 +39,8 @@ public class Main {
             dspConn = new DisplayConnectionSPI();
         } else if ("I2C".equals(connectionType)) {
             dspConn = new DisplayConnectionI2C();
+        } else if ("Mock".equals(connectionType)) {
+            dspConn = new DisplayConnectionMock();
         } else {
             System.err.println("unknown connection type: " + connectionType);
             System.exit(1);
@@ -50,7 +53,7 @@ public class Main {
         } else if ("SSD1327".equals(displayType)) {
             display = new SSD1327Display(dspConn);
         } else {
-            System.err.println("unknown connection type: " + connectionType);
+            System.err.println("unknown display type: " + connectionType);
             System.exit(1);
         }
 
@@ -73,6 +76,6 @@ public class Main {
         System.out.println("example:        run.sh dspTest SSD1327");
         System.out.println("Routine:        dspTest");
         System.out.println("DisplayType:    DSP1306_128_64 | SSD1327");
-        System.out.println("ConnectionType: I2C | SPI - default is: " + DEFAULT_CONNECTION_TYPE);
+        System.out.println("ConnectionType: I2C | SPI | Mock - default is: " + DEFAULT_CONNECTION_TYPE);
     }
 }

@@ -16,7 +16,7 @@ import java.io.IOException;
 
 public class DisplayTest {
     private static final Logger logger = LoggerFactory.getLogger(DisplayTest.class);
-    public static final int INVERSION_FLIP_SLEEP = 500;
+    public static final int INVERSION_FLIP_SLEEP = 300;
 
     public static final int I2C_BUS = I2CBus.BUS_1;
     public static final int I2C_ADDRESS = 0x3C;
@@ -40,6 +40,7 @@ public class DisplayTest {
 
     public void run() throws Exception {
         setUp();
+        testFilling();
         testDrawing();
         testInversionFlipping();
         shutdown();
@@ -58,13 +59,32 @@ public class DisplayTest {
         logger.debug("<< setUp");
     }
 
-    public void shutdown() {
+    public void shutdown() throws IOException {
         logger.info("-- shutdown");
         display.shutdown();
         logger.info("<< shutdown");
     }
 
-    public void testDrawing() {
+    public void testFilling() throws InterruptedException, IOException {
+        logger.info("testFilling");
+        for (int fillColl=0; fillColl<display.getWidth(); fillColl++) {
+            logger.info("fill col: {}", fillColl);
+            for (int r=0; r<display.getHeight(); r++) {
+                display.setPixel(fillColl, r, true);
+            }
+            display.display();
+            Thread.sleep(20);
+
+            if (fillColl == width / 2) {
+                logger.info("invert now");
+                display.setInverted(true);
+            }
+        }
+        logger.info("reset inverstion");
+        display.setInverted(false);
+    }
+
+    public void testDrawing() throws IOException {
         logger.debug(">> testDrawing");
 
         graphics.clearRect(0, 0, width, height);

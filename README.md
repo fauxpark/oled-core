@@ -34,8 +34,9 @@ The pinout for the Raspberry Pi GPIO header is as follows:
 ## Getting Started 
 
 ### Start display test on RPi
-Compile and show valid options 
+Compile and show valid options (you have to be root to use PI4J GPIO) 
 ```bash
+# sudo su
 # mvn compile
 # ./run.sh 
 ```
