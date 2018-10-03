@@ -28,7 +28,11 @@ public class DisplayConnectionMock extends DisplayConnection {
 
     @Override
     public void command(int command, int... params) throws IOException {
-        logger.info("command: {}, params: {}", HexConversionHelper.int255ToHex(command), HexConversionHelper.ints255ToHex(params));
+        if (params == null || params.length == 0) {
+            logger.info("command: {}", HexConversionHelper.int255ToHex(command));
+        } else {
+            logger.info("command: {}, params: {}", HexConversionHelper.int255ToHex(command), HexConversionHelper.ints255ToHex(params));
+        }
     }
 
     @Override

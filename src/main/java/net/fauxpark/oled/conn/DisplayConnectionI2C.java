@@ -112,19 +112,19 @@ public class DisplayConnectionI2C extends DisplayConnectionGPIO {
 
     @Override
     public void data(byte[] data, int start, int len) {
-        byte[] dataBytes = new byte[data.length + 1];
+        byte[] dataBytes = new byte[len + 1];
         dataBytes[0] = (byte) (1 << DC_BIT);
 
-        for (int i = start; i < start + len; i++) {
-            dataBytes[i + 1] = data[i];
+        for (int i = 0; i < len; i++) {
+            dataBytes[i + 1] = data[i + start];
         }
 
         try {
             i2c.write(dataBytes);
         } catch (IOException e) {
             logger.error("Exception on write: {}", e.getMessage());
-            logger.error("\tdataBytes: {} bytes", dataBytes.length);
-            logger.error("\tdata: {} bytes", HexConversionHelper.bytesToHex(data));
+            logger.error("\tdataBytes.len: {} bytes", dataBytes.length);
+            logger.error("\tdataBytes: {} bytes", HexConversionHelper.bytesToHex(dataBytes));
             e.printStackTrace();
         }
     }
