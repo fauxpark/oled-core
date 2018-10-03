@@ -5,16 +5,26 @@ import net.fauxpark.oled.conn.DisplayConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+
 public class SSD1306Display extends SSDisplay {
     private static final Logger logger = LoggerFactory.getLogger(SSD1306Display.class);
+    public static final int COLOR_BITS_PER_PIXEL = 1;
 
+    int pages = 0;
 
     public SSD1306Display(DisplayConnection dspConn, int width, int height) {
         super(dspConn, width, height);
+        init();
     }
 
     public SSD1306Display(DisplayConnection dspConn, int width, int height, Pin rstPin) {
         super(dspConn, width, height, rstPin);
+        init();
+    }
+
+    private void init() {
+        pages = height / 8;
     }
 
     /**
@@ -23,7 +33,7 @@ public class SSD1306Display extends SSDisplay {
      * @param externalVcc Indicates whether the display is being driven by an external power source.
      */
     @Override
-    public void startup(boolean externalVcc) {
+    public void startup(boolean externalVcc) throws IOException {
         logger.debug("startup");
         reset();
         setDisplayOn(false);
@@ -51,5 +61,55 @@ public class SSD1306Display extends SSDisplay {
         dspConn.command(Command.DISPLAY_ALL_ON_RESUME);
 
         super.startup(externalVcc);
+    }
+
+
+    /**
+     * Set a pixel in the buffer.
+     *
+     * @param x The X position of the pixel to set.
+     * @param y The Y position of the pixel to set.
+     * @param on Whether to turn this pixel on or off.
+     *
+     * @return False if the given coordinates are out of bounds.
+     */
+    public boolean setPixel(int x, int y, boolean on) {
+        if(x < 0 || x >= width || y < 0 || y >= height) {
+            return false;
+        }
+
+        if(on) {
+            buffer[x + (y / 8) * width] |= (1 << (y & 7));
+        } else {
+            buffer[x + (y / 8) * width] &= ~(1 << (y & 7));
+        }
+
+        return true;
+    }
+
+
+    public byte[] getNewBuffer() {
+        /**
+         * The number of pages in the display.
+         */
+        byte[] buffer = new byte[width * pages];
+        return buffer;
+    }
+
+    @Override
+    public synchronized void display() throws IOException {
+        dspConn.command(CommandSSD1306.SET_COLUMN_ADDRESS, 0, width - 1);
+        dspConn.command(CommandSSD1306.SET_PAGE_ADDRESS, 0, pages - 1);
+
+        super.display();
+    }
+
+    public int getColorBitsPerPixel() {
+        return COLOR_BITS_PER_PIXEL;
+    }
+
+    @Override
+    public CommandSSD1306 getCommandset() {
+        return new CommandSSD1306();
     }
 }

@@ -5,6 +5,8 @@ import net.fauxpark.oled.conn.DisplayConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+
 /**
  * A base class for defining implementations of the SSDisplay OLED display.
  *
@@ -15,6 +17,7 @@ public abstract class SSDisplay {
 
 	protected DisplayConnection dspConn;
 
+	Command commandset = null;
 
 
 	/**
@@ -33,10 +36,7 @@ public abstract class SSDisplay {
 	 */
 	protected int height;
 
-	/**
-	 * The number of pages in the display.
-	 */
-	protected int pages;
+
 
 	/**
 	 * The display buffer.
@@ -102,8 +102,9 @@ public abstract class SSDisplay {
 		this.width = width;
 		this.height = height;
 
-		pages = height / 8;
-		buffer = new byte[width * pages];
+		this.commandset = getCommandset();
+
+		buffer = getNewBuffer();
 	}
 
 	/**
@@ -119,7 +120,7 @@ public abstract class SSDisplay {
 	 *
 	 * @param externalVcc Indicates whether the display is being driven by an external power source.
 	 */
-	public void startup(boolean externalVcc) {
+	public void startup(boolean externalVcc) throws IOException {
 		setDisplayOn(true);
 		setInverted(false);
 		clear();
@@ -131,7 +132,7 @@ public abstract class SSDisplay {
 	/**
 	 * Start the power off procedure for the display.
 	 */
-	public void shutdown() {
+	public void shutdown() throws IOException {
 		clear();
 		display();
 		reset();
@@ -163,15 +164,13 @@ public abstract class SSDisplay {
 	 * NOTE: This does not clear the display, you must manually call {@link#display()}.
 	 */
 	public void clear() {
-		buffer = new byte[width * pages];
+		buffer = getNewBuffer();
 	}
 
 	/**
 	 * Send the buffer to the display.
 	 */
-	public synchronized void display() {
-		dspConn.command(Command.SET_COLUMN_ADDRESS, 0, width - 1);
-		dspConn.command(Command.SET_PAGE_ADDRESS, 0, pages - 1);
+	public synchronized void display() throws IOException {
 		dspConn.data(buffer);
 
 		// Jump start scrolling again if new data is written while enabled
@@ -212,11 +211,11 @@ public abstract class SSDisplay {
 	 *
 	 * @param displayOn Whether to turn the display on.
 	 */
-	public void setDisplayOn(boolean displayOn) {
+	public void setDisplayOn(boolean displayOn) throws IOException {
 		if (displayOn) {
-			dspConn.command(Command.DISPLAY_ON);
+			dspConn.command(commandset.DISPLAY_ON);
 		} else {
-			dspConn.command(Command.DISPLAY_OFF);
+			dspConn.command(commandset.DISPLAY_OFF);
 		}
 
 		this.displayOn = displayOn;
@@ -236,8 +235,8 @@ public abstract class SSDisplay {
 	 *
 	 * @param inverted Whether to invert the display or return to normal.
 	 */
-	public void setInverted(boolean inverted) {
-		dspConn.command(inverted ? Command.INVERT_DISPLAY : Command.NORMAL_DISPLAY);
+	public void setInverted(boolean inverted) throws IOException {
+		dspConn.command(inverted ? commandset.INVERT_DISPLAY : commandset.NORMAL_DISPLAY);
 		this.inverted = inverted;
 	}
 
@@ -255,12 +254,12 @@ public abstract class SSDisplay {
 	 *
 	 * @param contrast The contrast to set, from 0 to 255.
 	 */
-	public void setContrast(int contrast) {
+	public void setContrast(int contrast) throws IOException {
 		if (contrast < 0 || contrast > 255) {
 			return;
 		}
 
-		dspConn.command(Command.SET_CONTRAST, contrast);
+		dspConn.command(commandset.SET_CONTRAST, contrast);
 		this.contrast = contrast;
 	}
 
@@ -278,8 +277,8 @@ public abstract class SSDisplay {
 	 *
 	 * @param offset The number of rows to offset the display by.
 	 */
-	public void setOffset(int offset) {
-		dspConn.command(Command.SET_DISPLAY_OFFSET, offset);
+	public void setOffset(int offset) throws IOException {
+		dspConn.command(commandset.SET_DISPLAY_OFFSET, offset);
 		this.offset = offset;
 	}
 
@@ -302,8 +301,8 @@ public abstract class SSDisplay {
 	 *
 	 * @see Constant#SCROLL_STEP_5
 	 */
-	public void scrollHorizontally(boolean direction, int start, int end, int speed) {
-		dspConn.command(direction ? Command.LEFT_HORIZONTAL_SCROLL : Command.RIGHT_HORIZONTAL_SCROLL, Constant.DUMMY_BYTE_00, start, speed, end, Constant.DUMMY_BYTE_00, Constant.DUMMY_BYTE_FF);
+	public void scrollHorizontally(boolean direction, int start, int end, int speed) throws IOException {
+		dspConn.command(direction ? commandset.LEFT_HORIZONTAL_SCROLL : commandset.RIGHT_HORIZONTAL_SCROLL, Constant.DUMMY_BYTE_00, start, speed, end, Constant.DUMMY_BYTE_00, Constant.DUMMY_BYTE_FF);
 	}
 	/**
 	 * Scroll the display horizontally and vertically.
@@ -318,31 +317,31 @@ public abstract class SSDisplay {
 	 *
 	 * @see Constant#SCROLL_STEP_5
 	 */
-	public void scrollDiagonally(boolean direction, int start, int end, int offset, int rows, int speed, int step) {
-		dspConn.command(Command.SET_VERTICAL_SCROLL_AREA, offset, rows);
-		dspConn.command(direction ? Command.VERTICAL_AND_LEFT_HORIZONTAL_SCROLL : Command.VERTICAL_AND_RIGHT_HORIZONTAL_SCROLL, Constant.DUMMY_BYTE_00, start, speed, end, step);
+	public void scrollDiagonally(boolean direction, int start, int end, int offset, int rows, int speed, int step) throws IOException {
+		dspConn.command(commandset.SET_VERTICAL_SCROLL_AREA, offset, rows);
+		dspConn.command(direction ? commandset.VERTICAL_AND_LEFT_HORIZONTAL_SCROLL : commandset.VERTICAL_AND_RIGHT_HORIZONTAL_SCROLL, Constant.DUMMY_BYTE_00, start, speed, end, step);
 	}
 	/**
 	 * Start scrolling the display.
 	 */
-	public void startScroll() {
-		dspConn.command(Command.ACTIVATE_SCROLL);
+	public void startScroll() throws IOException {
+		dspConn.command(commandset.ACTIVATE_SCROLL);
 		scrolling = true;
 	}
 
 	/**
 	 * Stop scrolling the display.
 	 */
-	public void stopScroll() {
-		dspConn.command(Command.DEACTIVATE_SCROLL);
+	public void stopScroll() throws IOException {
+		dspConn.command(commandset.DEACTIVATE_SCROLL);
 		scrolling = false;
 	}
 
 	/**
 	 * No operation.
 	 */
-	public void noOp() {
-		dspConn.command(Command.NOOP);
+	public void noOp() throws IOException {
+		dspConn.command(commandset.NOOP);
 	}
 	/**
 	 * Get the horizontal flip state of the display.
@@ -358,11 +357,11 @@ public abstract class SSDisplay {
 	 *
 	 * @param hFlipped Whether to flip the display or return to normal.
 	 */
-	public void setHFlipped(boolean hFlipped) {
+	public void setHFlipped(boolean hFlipped) throws IOException {
 		if(hFlipped) {
-			dspConn.command(Command.SET_SEGMENT_REMAP);
+			dspConn.command(commandset.SET_SEGMENT_REMAP);
 		} else {
-			dspConn.command(Command.SET_SEGMENT_REMAP_REVERSE);
+			dspConn.command(commandset.SET_SEGMENT_REMAP_REVERSE);
 		}
 
 		// Horizontal flipping is not immediate
@@ -384,11 +383,11 @@ public abstract class SSDisplay {
 	 *
 	 * @param vFlipped Whether to flip the display or return to normal.
 	 */
-	public void setVFlipped(boolean vFlipped) {
+	public void setVFlipped(boolean vFlipped) throws IOException {
 		if (vFlipped) {
-			dspConn.command(Command.SET_COM_SCAN_INC);
+			dspConn.command(commandset.SET_COM_SCAN_INC);
 		} else {
-			dspConn.command(Command.SET_COM_SCAN_DEC);
+			dspConn.command(commandset.SET_COM_SCAN_DEC);
 		}
 		this.vFlipped = vFlipped;
 	}
@@ -418,19 +417,7 @@ public abstract class SSDisplay {
 	 *
 	 * @return False if the given coordinates are out of bounds.
 	 */
-	public boolean setPixel(int x, int y, boolean on) {
-		if(x < 0 || x >= width || y < 0 || y >= height) {
-			return false;
-		}
-
-		if(on) {
-			buffer[x + (y / 8) * width] |= (1 << (y & 7));
-		} else {
-			buffer[x + (y / 8) * width] &= ~(1 << (y & 7));
-		}
-
-		return true;
-	}
+	public abstract boolean setPixel(int x, int y, boolean on);
 
 	/**
 	 * Get the display buffer.
@@ -483,6 +470,14 @@ public abstract class SSDisplay {
 		return dspConn;
 	}
 
+    /**
+     * creates a new byte[] buffer dependent on display size and bits per pixel
+     * (device specific)
+     * @return
+     */
+	public abstract byte[] getNewBuffer();
+
+
 	/*public GpioController getGpio() {
 		return gpio;
 	}
@@ -491,12 +486,18 @@ public abstract class SSDisplay {
 		this.gpio = gpio;
 	}*/
 
+	public abstract int getColorBitsPerPixel();
+
 	@Override
 	public String toString() {
 		return this.getClass().getSimpleName() + "{" +
 				"width=" + width +
 				", height=" + height +
-				", pages=" + pages +
+				", bitsPerPixel=" + getColorBitsPerPixel() +
 				'}';
 	}
+
+	public Command getCommandset() {
+	    return new Command();
+    }
 }
