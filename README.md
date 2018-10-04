@@ -119,7 +119,20 @@ Currently three character sets are supported:
 
 In addition, it is possible to create your own character sets by implementing `Font` and specifying the number of rows and columns, and the array of glyph data. Refer to the `Font` JavaDoc for an explanation on how the glyphs are encoded.
 
-### Credits
+## Issues
+
+### I2C Mode (& grey-scale displays - like SDD1327)
+
+Because of the larger amounts of data needed to transfer on every display update
+when using grayscale-displays
+(f.e. the SDD1327 has 128 x 128 pixel x 4 bits per pixel = 8129 bytes), perhaps you may consider speeding up your I2C bus from default 100 kHz to 400 kHz.
+
+Refer to [https://www.raspberrypi-spy.co.uk/2018/02/change-raspberry-pi-i2c-bus-speed/](https://www.raspberrypi-spy.co.uk/2018/02/change-raspberry-pi-i2c-bus-speed/)
+
+This might not be such a huge problem using sw-displays but might be a limiting factor there too.
+The display update of SSD1306 with 128 x 64 px x 1 BPP consumes 1024 bytes.
+
+## Credits
 
 Some of this code has been borrowed from 
 * [py-gaugette](https://github.com/guyc/py-gaugette)
