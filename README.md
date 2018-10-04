@@ -61,55 +61,71 @@ start for example with
 To set up the display, simply create a new `SSD1306` object, like so:
 
 ```java
-SSD1306 ssd1306 = new SSD1306SPIImpl(128, 64, SpiChannel.CS0, RaspiPin.GPIO_15, RaspiPin.GPIO_16);
-// Or:
-SSD1306 ssd1306 = new SSD1306I2CImpl(128, 64, RaspiPin.GPIO_15, I2CBus.BUS_1, 0x3D);
+DisplayConnection dspConn;
+SSDisplay display;
 
-// false indicates no external VCC
-ssd1306.startup(false);
+// choose connection type SPI
+dspConn = new DisplayConnectionSPI();
+
+// or I2C
+dspConn = new DisplayConnectionI2C();
+
+
+// choose display type SSD1306
+display = new SSD1306(dspConn, 128, 64);
+
+// or SSD1327
+display = new SSD1327(dspConn);
+
+
+// call startup
+display.startup(false);
+
+// and start using it..
 
 // Turns the pixel in the top left corner on
-ssd1306.setPixel(0, 0, true);
+display.setPixel(0, 0, true);
 
 // Sends the internal buffer to the display
-ssd1306.display();
+display.display();
 
 // Inverts the display
-ssd1306.setInverted(true);
-
-// Flips the display upside down
-ssd1306.setVFlipped(true);
+display.setInverted(true);
 ```
-
-If you are testing on something other than a Raspberry Pi, you can use the `SSD1306MockImpl` class instead to mostly simulate the display without Pi4J complaining about your platform. However, some features will not be available (such as scrolling, as it is done by the display itself).
 
 Most properties of the display (eg. invertedness, display on/off) are reachable through getters and setters.
-As the SSD1306 does not provide any information as to its state, these are implemented as fields in the `SSD1306` class.
+As the SSD controllers do not provide any information as to its state, these are implemented as fields in the `SSD1306` class.
 
-## Basic Graphics
+## 2D Graphics with AWT
 
-You can also do some basic line & shape drawing using the `Graphics` class.
-Just call the `getGraphics()` method on the SSD1306 instance:
+You can also do line & shape drawing using the `Graphics2D` class from `java.awt`.
+Just call the `getGraphics2D()` method on the `SSDisplay` instance:
 
 ```java
-SSD1306 ssd1306 = new SSD1306SPIImpl(128, 64, SpiChannel.CS0, RaspiPin.GPIO_15, RaspiPin.GPIO_16);
-Graphics graphics = ssd1306.getGraphics();
+// SSDisplay display = new SSD1306(dspConn, 128, 64);
+SSDisplay display = new SSD1327(new DisplayConnectionI2C());
+display.startup(false);
 
-ssd1306.startup(false);
+// make use of Java AWT Graphics2D
+Graphics2D graphics = display.getGraphics2D();
 
 // Draws a line from the top left to the bottom right of the display
-graphics.line(0, 0, 127, 63);
+graphics.drawRect(0, 0, display.getWidth()-1, display.getHeight()-1);
 
 // Draws an arc from (63,31) with a radius of 8 pixels and an angle of 15 degrees
-graphics.arc(63, 31, 8, 0, 15);
+graphics.drawArc(display.getWidth() -25, 10, 30,30, 0, 360);
 
 // Writes "Hello world!" at (20,20) using the Windows-1252 charset
-graphics.text(20, 20, new CodePage1252(), "Hello world!");
+Font font = new Font("Serif", Font.BOLD, 18);
+graphics.setFont(font);
+graphics.drawString( "Hello world!", 5, 20);
+
+display.rasterGraphics2DImage(true);
 ```
 
-## Text Rendering
+## Legacy Text Rendering
 
-As you can see above, this library can draw text onto the screen. It is also possible to change the character set.
+This library can draw text onto the screen (wihtout using `java.awt`). It is also possible to change the character set.
 
 Currently three character sets are supported:
 

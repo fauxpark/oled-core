@@ -6,6 +6,7 @@ import net.fauxpark.oled.SSD1327;
 import net.fauxpark.oled.SSDisplay;
 import net.fauxpark.oled.conn.DisplayConnection;
 import net.fauxpark.oled.conn.DisplayConnectionI2C;
+import net.fauxpark.oled.conn.DisplayConnectionMock;
 import net.fauxpark.oled.conn.DisplayConnectionSPI;
 import net.fauxpark.oled.font.CodePage1252;
 import org.slf4j.Logger;
@@ -25,6 +26,39 @@ public class ExampleFromReadme {
     public static void main(String... args) throws Exception {
         awtGraphicsExample();
     }
+    protected static void simpleExample() throws IOException {
+        DisplayConnection dspConn;
+        SSDisplay display;
+
+        // choose connection type SPI
+        dspConn = new DisplayConnectionSPI();
+
+        // or I2C
+        dspConn = new DisplayConnectionI2C();
+
+
+        // choose display type SSD1306
+        display = new SSD1306(dspConn, 128, 64);
+
+        // or SSD1327
+        display = new SSD1327(dspConn);
+
+
+        // call startup
+        display.startup(false);
+
+        // and start using it..
+
+        // Turns the pixel in the top left corner on
+        display.setPixel(0, 0, true);
+
+        // Sends the internal buffer to the display
+        display.display();
+
+        // Inverts the display
+        display.setInverted(true);
+    }
+
     protected static void awtGraphicsExample() throws IOException {
         logger.info("awtGraphicsExample");
 
