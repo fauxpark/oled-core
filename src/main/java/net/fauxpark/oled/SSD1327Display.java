@@ -21,7 +21,7 @@ public class SSD1327Display extends SSDisplay {
     public static final int HEIGHT = 128;
     public static final int COLOR_BITS_PER_PIXEL = 4;
 
-    int ROW_SIZE_IN_BYTES = WIDTH * COLOR_BITS_PER_PIXEL / 8;
+    public static int ROW_SIZE_IN_BYTES = WIDTH * COLOR_BITS_PER_PIXEL / 8;
 
 
     // public static final int DEFAULT_REMAP_CONFIG = 0b0;
@@ -30,6 +30,8 @@ public class SSD1327Display extends SSDisplay {
     public static int LOWER_NIBBLE_MASK = 0x0F;
     public static int HIGHER_NIBBLE_MASK = 0xF0;
 
+    private boolean splittingOddEven = false;
+    private boolean invertSplittingOddEven = true;  // WARNING: my device inverted the flag 0xA0
 
     public CommandSSD1327 commandset = new CommandSSD1327();
 
@@ -47,14 +49,24 @@ public class SSD1327Display extends SSDisplay {
      */
     public void startup(boolean externalVcc) throws IOException {
         logger.debug("startup");
+
         reset();
 
+        dspConn.command(0xFD, 0x12);    // send unlock
+
         setDisplayOn(false);
+
+        // set mulitplex-ratio to default (127)
+        dspConn.command(commandset.SET_MULTIPLEX_RATIO, 127);
+
+        dspConn.command(commandset.SET_CONTRAST, 0x7F);
+
+        stopScroll();
         setDisplayStartLine(0);
-        setDisplayOffset(0x0);
+        setDisplayOffset(0);
 
         //setRemap(DEFAULT_REMAP_CONFIG);
-        setRemap(false, false, false, false, false);
+        setRemap(false, false, false,false, splittingOddEven);
 
         resetColumnAndRowStartEndAddress();
 
@@ -101,19 +113,34 @@ public class SSD1327Display extends SSDisplay {
         dspConn.command(commandset.SET_SEGMENT_REMAP, remapConfig);
     }
 
+
+    public void setRemap(boolean columnAddressRemapping,
+                         boolean nibbleRemapping,
+                         boolean addressIncrementMode,
+                         boolean comRemapping,
+                         boolean splittingOfOddEven) throws IOException {
+        setRemap(columnAddressRemapping,
+                nibbleRemapping,
+                addressIncrementMode,
+                false,
+                comRemapping,
+                false,
+                splittingOfOddEven);
+    }
     /**
-     *
      * @param columnAddressRemapping
      * @param nibbleRemapping
      * @param addressIncrementMode vertical adress increment if true, horizontal (default) if false
-     * @param comRemapping false: up to down, true: down to up
+     * @param comRemapping false: up to down, true: down to up (vertical mirroring)
      * @param splittingOfOddEven
      * @throws IOException
      */
     public void setRemap(boolean columnAddressRemapping,
                          boolean nibbleRemapping,
                          boolean addressIncrementMode,
+                         boolean undocumented3,
                          boolean comRemapping,
+                         boolean undocumented5,
                          boolean splittingOfOddEven) throws IOException {
 
         int remapConfig = 0;
@@ -127,11 +154,29 @@ public class SSD1327Display extends SSDisplay {
             // vertical adress increment
             remapConfig |= (1 << 2);
         }
-        if (comRemapping) {
+        if (undocumented3) {
             remapConfig |= (1 << 3);
         }
-        if (splittingOfOddEven) {
+        if (comRemapping) {
             remapConfig |= (1 << 4);
+        }
+        if (undocumented5) {
+            remapConfig |= (1 << 5);
+        }
+
+        if (invertSplittingOddEven) {
+            splittingOfOddEven = ! splittingOfOddEven;
+        }
+        /*
+        This bit is made to match the COM layout connection on the panel.
+        When A[6] is set to 0, no splitting odd / even of the COM signal is performed, output pin assignment
+        sequence is shown as below (for 128MUX ratio):
+
+        When A[6] is set to 1, splitting odd / even of the COM signal is performed, output pin assignment
+        sequence is shown as below
+         */
+        if (splittingOfOddEven) {
+            remapConfig |= (1 << 6);
         }
 
         setRemap(remapConfig);
@@ -152,6 +197,15 @@ public class SSD1327Display extends SSDisplay {
             return false;
         }
 
+        if (splittingOddEven) {
+            int yNibble = y & 1;
+            if (yNibble > 0) {
+                y = y / 2 + 64;
+            } else {
+                y = y / 2;
+            }
+        }
+
         int arrayElement = getBufferArrayElementForPixel(x, y);
         int nibbleSelector = x & 1;
         int nibble = LOWER_NIBBLE_MASK;
@@ -169,7 +223,7 @@ public class SSD1327Display extends SSDisplay {
     }
 
     public static int getBufferArrayElementForPixel(int x, int y) {
-        return x / 2 + y * WIDTH/2;
+        return x / 2 + y * ROW_SIZE_IN_BYTES;
     }
 
     public byte[] getNewBuffer() {
@@ -185,6 +239,8 @@ public class SSD1327Display extends SSDisplay {
         return new CommandSSD1327();
     }
 
+
+    // FIXME use double-buffer
     /**
      * because of size have to output line by line
      * @throws IOException
