@@ -128,12 +128,15 @@ public class DisplayTest {
         Font fontSmall = new Font("Serif", Font.BOLD, 12);
 
         graphics.setFont(fontSmall);
+        graphics.setColor(Color.white);
         graphics.drawString(display.getClass().getSimpleName(), 5, 12);
 
+        graphics.drawLine(0, display.getHeight() - 22, display.getWidth() - 1, display.getHeight() - 22);
+        graphics.setColor(Color.gray);
         SimpleDateFormat df = new SimpleDateFormat("HH:mm:ss");
         String date = df.format(new Date());
         graphics.setFont(font);
-        graphics.drawString(date, 0, display.getHeight() - 15);
+        graphics.drawString(date, 0, display.getHeight());
 
         Polygon check = new Polygon();
         int ox = width - 25, oy = 5;
@@ -143,6 +146,7 @@ public class DisplayTest {
         check.addPoint(ox + 19, oy + 0);
         check.addPoint(ox + 8, oy + 11);
         check.addPoint(ox + 3, oy + 6);
+        graphics.setColor(Color.white);
 
         graphics.fillPolygon(check);
 /*
@@ -176,6 +180,7 @@ public class DisplayTest {
         String msg = "" + duration1 + " ms per frame";
         logger.info(msg);
         graphics.setFont(fontSmall);
+        graphics.setColor(Color.darkGray);
         graphics.drawString(msg, 5, 30);
         display.rasterGraphics2DImage(true);
 

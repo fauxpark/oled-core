@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.awt.image.Raster;
 import java.io.IOException;
 
 /**
@@ -185,6 +186,10 @@ public class SSD1327 extends SSDisplay {
     }
 
 
+    public boolean setPixel(int x, int y, boolean on) {
+        return setPixel(x, y, 255);
+    }
+
     /**
      * Set a pixel in the buffer.
      *
@@ -194,7 +199,7 @@ public class SSD1327 extends SSDisplay {
      *
      * @return False if the given coordinates are out of bounds.
      */
-    public boolean setPixel(int x, int y, boolean on) {
+    public boolean setPixel(int x, int y, int grey) {
         if(x < 0 || x >= width || y < 0 || y >= height) {
             return false;
         }
@@ -209,16 +214,30 @@ public class SSD1327 extends SSDisplay {
         }
 
         int arrayElement = getBufferArrayElementForPixel(x, y);
-        int nibbleSelector = x & 1;
-        int nibble = LOWER_NIBBLE_MASK;
-        if (nibbleSelector > 0) {
-            nibble = HIGHER_NIBBLE_MASK;
-        }
 
-        if(on) {
-            buffer[arrayElement] |= nibble;
+
+        int nibbleSelector = x & 1;
+        if (nibbleSelector == 0) {
+            // use lower nibble
+            // scale 8 bit to 4 bit -> 0b0000xxxx
+            int greyMask = (grey >> 4) & LOWER_NIBBLE_MASK;
+            buffer[arrayElement] |= greyMask;
+
+            // clear lower nibble - leave higher untouched
+            buffer[arrayElement] &= HIGHER_NIBBLE_MASK;
+
+            // apply with or
+            buffer[arrayElement] |= greyMask;
         } else {
-            buffer[arrayElement] &= ~ nibble;
+            // use higher nibble
+            // scale 8 bit to 4 bit -> 0bxxxx0000
+            int greyMask = grey & HIGHER_NIBBLE_MASK;
+
+            // clear higher nibble - leave lower untouched
+            buffer[arrayElement] &= LOWER_NIBBLE_MASK;
+
+            // apply with or
+            buffer[arrayElement] |= greyMask;
         }
 
         return true;
@@ -265,11 +284,27 @@ public class SSD1327 extends SSDisplay {
 
     public Graphics2D getGraphics2D() {
         if (bufferedImage == null) {
-            bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_BYTE_BINARY);
+            bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_BYTE_GRAY);
             graphics2D = bufferedImage.createGraphics();
             graphics2D.clearRect(0, 0, width, height);
-            graphics2D.setColor(Color.WHITE);
+            graphics2D.setColor(Color.lightGray);
         }
         return graphics2D;
+    }
+
+    @Override
+    public void rasterGraphics2DImage(boolean display) throws IOException {
+        Raster r = bufferedImage.getRaster();
+        int sample = 0;
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                sample = r.getSample(x, y, 0);
+                setPixel(x, y, sample);
+            }
+        }
+
+        if (display) {
+            display();
+        }
     }
 }

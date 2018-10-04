@@ -523,10 +523,7 @@ public abstract class SSDisplay {
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++) {
 				sample = r.getSample(x, y, 0);
-				// TODO improve for grayscale
-				//if (sample > 0) {
 				setPixel(x, y, (sample > 0));
-				//}
 			}
 		}
 
