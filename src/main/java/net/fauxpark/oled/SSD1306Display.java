@@ -13,6 +13,10 @@ public class SSD1306Display extends SSDisplay {
 
     int pages = 0;
 
+    public CommandSSD1306 commandset = new CommandSSD1306();
+
+
+
     public SSD1306Display(DisplayConnection dspConn, int width, int height) {
         super(dspConn, width, height);
         init();
@@ -25,6 +29,7 @@ public class SSD1306Display extends SSDisplay {
 
     private void init() {
         pages = height / 8;
+        super.commandset = this.commandset;
     }
 
     /**
@@ -38,29 +43,29 @@ public class SSD1306Display extends SSDisplay {
         reset();
         setDisplayOn(false);
 
-        dspConn.command(Command.SET_DISPLAY_CLOCK_DIV, width);  // from SPI
-        // command(Command.SET_DISPLAY_CLOCK_DIV, 0x80);    // from I2C
+        dspConn.command(commandset.SET_DISPLAY_CLOCK_DIV, width);  // from SPI
+        // command(commandset.SET_DISPLAY_CLOCK_DIV, 0x80);    // from I2C
 
         // TODO what´s this for?
-        // command(Command.SET_MULTIPLEX_RATIO, width - 1);// from SPI
-        dspConn.command(Command.SET_MULTIPLEX_RATIO, height == 64 ? 0x3F : 0x1F);// from I2C
+        // command(commandset.SET_MULTIPLEX_RATIO, width - 1);// from SPI
+        dspConn.command(commandset.SET_MULTIPLEX_RATIO, height == 64 ? 0x3F : 0x1F);// from I2C
 
         setOffset(0);
-        dspConn.command(Command.SET_START_LINE_00);
-        dspConn.command(Command.SET_CHARGE_PUMP, externalVcc ? Constant.CHARGE_PUMP_DISABLE : Constant.CHARGE_PUMP_ENABLE);
-        dspConn.command(Command.SET_MEMORY_MODE, Constant.MEMORY_MODE_HORIZONTAL);
+        dspConn.command(commandset.SET_START_LINE_00);
+        dspConn.command(commandset.SET_CHARGE_PUMP, externalVcc ? Constant.CHARGE_PUMP_DISABLE : Constant.CHARGE_PUMP_ENABLE);
+        dspConn.command(commandset.SET_MEMORY_MODE, Constant.MEMORY_MODE_HORIZONTAL);
         setHFlipped(false);
         setVFlipped(false);
-        dspConn.command(Command.SET_COM_PINS, height == 64 ? 0x12 : 0x02);
+        dspConn.command(commandset.SET_COM_PINS, height == 64 ? 0x12 : 0x02);
 
         setContrast(externalVcc ? 0x9F : 0xCF); // from SPI
         setContrast(height == 64 ? 0x8F : externalVcc ? 0x9F : 0xCF);   // from I2C
 
-        dspConn.command(Command.SET_PRECHARGE_PERIOD, externalVcc ? 0x22 : 0xF1);
-        dspConn.command(Command.SET_VCOMH_DESELECT, Constant.VCOMH_DESELECT_LEVEL_00);
-        dspConn.command(Command.DISPLAY_ALL_ON_RESUME);
+        dspConn.command(commandset.SET_PRECHARGE_PERIOD, externalVcc ? 0x22 : 0xF1);
+        dspConn.command(commandset.SET_VCOMH_DESELECT, Constant.VCOMH_DESELECT_LEVEL_00);
+        dspConn.command(commandset.DISPLAY_MODE_NORMAL);
 
-        super.startup(externalVcc);
+        super.basicStartup(externalVcc);
     }
 
 
@@ -98,8 +103,8 @@ public class SSD1306Display extends SSDisplay {
 
     @Override
     public synchronized void display() throws IOException {
-        dspConn.command(CommandSSD1306.SET_COLUMN_ADDRESS, 0, width - 1);
-        dspConn.command(CommandSSD1306.SET_PAGE_ADDRESS, 0, pages - 1);
+        dspConn.command(commandset.SET_COLUMN_ADDRESS, 0, width - 1);
+        dspConn.command(commandset.SET_PAGE_ADDRESS, 0, pages - 1);
 
         super.display();
     }

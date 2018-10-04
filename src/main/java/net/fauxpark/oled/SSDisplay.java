@@ -17,7 +17,7 @@ public abstract class SSDisplay {
 
 	protected DisplayConnection dspConn;
 
-	Command commandset = null;
+	public CommandSSD commandset = new CommandSSD();
 
 
 	/**
@@ -120,10 +120,12 @@ public abstract class SSDisplay {
 	 *
 	 * @param externalVcc Indicates whether the display is being driven by an external power source.
 	 */
-	public void startup(boolean externalVcc) throws IOException {
+	public abstract void startup(boolean externalVcc) throws IOException;
+
+	protected void basicStartup(boolean externalVcc) throws IOException {
 		setDisplayOn(true);
 		setInverted(false);
-		clear();
+		clearBuffer();
 		display();
 
 		initialised = true;
@@ -133,7 +135,7 @@ public abstract class SSDisplay {
 	 * Start the power off procedure for the display.
 	 */
 	public void shutdown() throws IOException {
-		clear();
+		clearBuffer();
 		display();
 		reset();
 
@@ -161,9 +163,9 @@ public abstract class SSDisplay {
 	/**
 	 * Clear the buffer.
 	 * <br/>
-	 * NOTE: This does not clear the display, you must manually call {@link#display()}.
+	 * NOTE: This does not clearBuffer the display, you must manually call {@link#display()}.
 	 */
-	public void clear() {
+	public void clearBuffer() {
 		buffer = getNewBuffer();
 	}
 
@@ -236,7 +238,7 @@ public abstract class SSDisplay {
 	 * @param inverted Whether to invert the display or return to normal.
 	 */
 	public void setInverted(boolean inverted) throws IOException {
-		dspConn.command(inverted ? commandset.INVERT_DISPLAY : commandset.NORMAL_DISPLAY);
+		dspConn.command(inverted ? commandset.DISPLAY_MODE_INVERT : commandset.DISPLAY_MODE_NORMAL);
 		this.inverted = inverted;
 	}
 
@@ -497,7 +499,7 @@ public abstract class SSDisplay {
 				'}';
 	}
 
-	public Command getCommandset() {
-	    return new Command();
+	public CommandSSD getCommandset() {
+	    return new CommandSSD();
     }
 }
