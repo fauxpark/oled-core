@@ -49,16 +49,23 @@ public class SSD1327Display extends SSDisplay {
         logger.debug("startup");
         reset();
 
-        setDisplayOn(true);
+        setDisplayOn(false);
         setDisplayStartLine(0);
-        setDisplayOffset(0);
+        setDisplayOffset(0x0);
 
         //setRemap(DEFAULT_REMAP_CONFIG);
         setRemap(false, false, false, false, false);
 
+        resetColumnAndRowStartEndAddress();
+
         dspConn.command(commandset.DISPLAY_MODE_NORMAL);
 
         super.basicStartup(externalVcc);
+    }
+
+    private void resetColumnAndRowStartEndAddress() throws IOException {
+        setColumnStartEndAddress(0, ROW_SIZE_IN_BYTES - 1);
+        setRowStartEndAddress(0, HEIGHT - 1);
     }
 
     public void setDisplayStartLine(int line) throws IOException {
@@ -145,17 +152,24 @@ public class SSD1327Display extends SSDisplay {
             return false;
         }
 
-        int arrayElement = x / 2 + y * width;
-        int nibble = x & 1;
-        int shiftedNibble =  (0xF << nibble * 4);
+        int arrayElement = getBufferArrayElementForPixel(x, y);
+        int nibbleSelector = x & 1;
+        int nibble = LOWER_NIBBLE_MASK;
+        if (nibbleSelector > 0) {
+            nibble = HIGHER_NIBBLE_MASK;
+        }
 
         if(on) {
-            buffer[arrayElement] |= shiftedNibble;
+            buffer[arrayElement] |= nibble;
         } else {
-            buffer[arrayElement] &= ~ shiftedNibble;
+            buffer[arrayElement] &= ~ nibble;
         }
 
         return true;
+    }
+
+    public static int getBufferArrayElementForPixel(int x, int y) {
+        return x / 2 + y * WIDTH/2;
     }
 
     public byte[] getNewBuffer() {
@@ -180,8 +194,7 @@ public class SSD1327Display extends SSDisplay {
         int tranferInSegments = 2;      // exception in PI4j if tranferring the whole bunch at once
         int rowsAtOneTime = height / tranferInSegments;
 
-        setColumnStartEndAddress(0, ROW_SIZE_IN_BYTES);
-        setRowStartEndAddress(0, HEIGHT);
+        resetColumnAndRowStartEndAddress();
 
         //byte [] rowData = new byte[rowSize];
         for (int row = 0; row<height; row+= rowsAtOneTime) {
