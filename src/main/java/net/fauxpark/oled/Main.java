@@ -5,6 +5,7 @@ import net.fauxpark.oled.conn.DisplayConnectionI2C;
 import net.fauxpark.oled.conn.DisplayConnectionMock;
 import net.fauxpark.oled.conn.DisplayConnectionSPI;
 import net.fauxpark.oled.main.DisplayTest;
+import net.fauxpark.oled.main.DisplayTestStartupShutdown;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,6 +63,9 @@ public class Main {
         if ("dspTest".equals(routine)) {
             DisplayTest dspTest = new DisplayTest(display);
             dspTest.run();
+        } else if ("dspTestStartStop".equals(routine)) {
+            DisplayTestStartupShutdown dspTest = new DisplayTestStartupShutdown(display);
+            dspTest.run();
         } else {
             System.err.println("unknown routine type: " + routine);
             System.exit(1);
@@ -74,7 +78,7 @@ public class Main {
         System.out.println("\trun.{sh|bat} RoutineName DisplayType [ConnectionType]");
         System.out.println("");
         System.out.println("example:        run.sh dspTest SSD1327");
-        System.out.println("Routine:        dspTest");
+        System.out.println("Routine:        dspTest | dspTestStartStop");
         System.out.println("DisplayType:    DSP1306_128_64 | SSD1327");
         System.out.println("ConnectionType: I2C | SPI | Mock - default is: " + DEFAULT_CONNECTION_TYPE);
     }
