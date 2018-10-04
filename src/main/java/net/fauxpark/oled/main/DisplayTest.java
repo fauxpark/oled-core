@@ -2,10 +2,8 @@ package net.fauxpark.oled.main;
 
 import com.pi4j.io.gpio.Pin;
 import com.pi4j.io.i2c.I2CBus;
-import net.fauxpark.oled.conn.DisplayConnection;
-import net.fauxpark.oled.conn.DisplayConnectionI2C;
-import net.fauxpark.oled.SSD1306Display;
 import net.fauxpark.oled.SSDisplay;
+import net.fauxpark.oled.misc.HexConversionHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,7 +38,9 @@ public class DisplayTest {
 
     public void run() throws Exception {
         setUp();
-        testFilling();
+        testPatternFilling();
+        testRowFilling();
+        testDiagonalLines();
         testDrawing();
         testInversionFlipping();
         shutdown();
@@ -65,26 +65,48 @@ public class DisplayTest {
         logger.info("<< shutdown");
     }
 
-    public void testFilling() throws InterruptedException, IOException {
-        logger.info("testFilling");
-        boolean inverted = false;
-        for (int fillRow=0; fillRow<display.getHeight(); fillRow++) {
+    public void testPatternFilling() throws IOException, InterruptedException {
+        logger.info("testRowFilling");
+        for (byte i=0; i<16; i++) {
+            byte b = (byte) (i << 4);
+            b |= i;
+            logger.info("pattern: {}", HexConversionHelper.byteToHex(b));
+            display.fillBufferWithPattern(b);
+            display.display();
+
+            Thread.sleep(50);
+        }
+        display.clearBuffer();
+    }
+
+
+    public void testDiagonalLines() throws InterruptedException, IOException {
+        logger.info("testRowFilling");
+        for (int r=0; r<display.getHeight() && r<display.getWidth(); r++) {
+            display.setPixel(r, r, true);
+            display.setPixel(display.getWidth() - r -1, r, true);
+        }
+        display.display();
+        Thread.sleep(2000);
+        display.clearBuffer();
+    }
+
+    public void testRowFilling() throws InterruptedException, IOException {
+        logger.info("testRowFilling");
+        for (int fillRow=0; fillRow<display.getHeight(); fillRow += 4) {
             logger.info("fill col: {}", fillRow);
-            display.setInverted(inverted);
-            inverted = ! inverted;
 
             for (int c=0; c<display.getWidth(); c++) {
                 display.setPixel(c, fillRow, true);
             }
             display.display();
-            Thread.sleep(20);
+            //Thread.sleep(20);
 
         }
-        logger.info("reset inverstion");
-        display.setInverted(false);
+        display.clearBuffer();
     }
 
-    public void testDrawing() throws IOException {
+    public void testDrawing() throws IOException, InterruptedException {
         logger.debug(">> testDrawing");
 
         graphics.clearRect(0, 0, width, height);
@@ -127,6 +149,7 @@ public class DisplayTest {
 
         logger.debug("-- display");
         display.display();
+        Thread.sleep(1000);
 
         logger.debug("<< testDrawing");
     }

@@ -169,6 +169,14 @@ public abstract class SSDisplay {
 		buffer = getNewBuffer();
 	}
 
+
+	public void fillBufferWithPattern(byte bPattern) {
+		for (int i=0; i<buffer.length; i++) {
+			buffer[i] = bPattern;
+		}
+	}
+
+
 	/**
 	 * Send the buffer to the display.
 	 */
