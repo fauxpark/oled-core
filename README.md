@@ -7,6 +7,8 @@ It makes use of the [Pi4J](https://github.com/Pi4J/pi4j) library, which does all
 
 The aim of this project is to abstract away the low-level aspects of the SSD and focus on manipulating the contents of the screen through a very simple API.
 
+![example of SSD1327](https://raw.githubusercontent.com/cljk/oled-core/master/src/doc/img/img_001.png)
+
 ### Display support
 
 | Device                              | state                |
@@ -15,6 +17,7 @@ The aim of this project is to abstract away the low-level aspects of the SSD and
 | SSD1327 (128px * 128px * 4bit grey) | in progress          |
 
 Other types should be easy to add if pixel-bitsize is the same
+
 
 ## GPIO Pinout
 
