@@ -5,6 +5,9 @@ import net.fauxpark.oled.conn.DisplayConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.awt.image.Raster;
 import java.io.IOException;
 
 /**
@@ -19,7 +22,8 @@ public abstract class SSDisplay {
 
 	public CommandSSD commandset = new CommandSSD();
 
-
+	protected BufferedImage bufferedImage;
+	protected Graphics2D graphics2D;
 	/**
 	 * A helper class for drawing lines, shapes, text and images.
 	 * @deprecated used anymore?
@@ -510,4 +514,24 @@ public abstract class SSDisplay {
 	public CommandSSD getCommandset() {
 	    return new CommandSSD();
     }
+
+    public abstract Graphics2D getGraphics2D();
+
+	public void rasterGraphics2DImage(boolean display) throws IOException {
+		Raster r = bufferedImage.getRaster();
+		int sample = 0;
+		for (int y = 0; y < height; y++) {
+			for (int x = 0; x < width; x++) {
+				sample = r.getSample(x, y, 0);
+				// TODO improve for grayscale
+				//if (sample > 0) {
+				setPixel(x, y, (sample > 0));
+				//}
+			}
+		}
+
+		if (display) {
+			display();
+		}
+	}
 }

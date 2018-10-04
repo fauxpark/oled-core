@@ -5,10 +5,12 @@ import net.fauxpark.oled.conn.DisplayConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 
-public class SSD1306Display extends SSDisplay {
-    private static final Logger logger = LoggerFactory.getLogger(SSD1306Display.class);
+public class SSD1306 extends SSDisplay {
+    private static final Logger logger = LoggerFactory.getLogger(SSD1306.class);
     public static final int COLOR_BITS_PER_PIXEL = 1;
 
     int pages = 0;
@@ -17,12 +19,12 @@ public class SSD1306Display extends SSDisplay {
 
 
 
-    public SSD1306Display(DisplayConnection dspConn, int width, int height) {
+    public SSD1306(DisplayConnection dspConn, int width, int height) {
         super(dspConn, width, height);
         init();
     }
 
-    public SSD1306Display(DisplayConnection dspConn, int width, int height, Pin rstPin) {
+    public SSD1306(DisplayConnection dspConn, int width, int height, Pin rstPin) {
         super(dspConn, width, height, rstPin);
         init();
     }
@@ -116,5 +118,15 @@ public class SSD1306Display extends SSDisplay {
     @Override
     public CommandSSD1306 getCommandset() {
         return new CommandSSD1306();
+    }
+
+    public Graphics2D getGraphics2D() {
+        if (bufferedImage == null) {
+            bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_BYTE_BINARY);
+            graphics2D = bufferedImage.createGraphics();
+            graphics2D.clearRect(0, 0, width, height);
+            graphics2D.setColor(Color.WHITE);
+        }
+        return graphics2D;
     }
 }

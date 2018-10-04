@@ -8,11 +8,11 @@ import org.slf4j.LoggerFactory;
 
 public class SSD1327DisplayTest {
     private static final Logger logger = LoggerFactory.getLogger(SSD1327DisplayTest.class);
-    SSD1327Display display;
+    SSD1327 display;
 
     @Before
     public void setup() {
-        display = new SSD1327Display(null);
+        display = new SSD1327(null);
     }
 
     @Test
@@ -32,11 +32,11 @@ public class SSD1327DisplayTest {
         Assert.assertEquals(1, el);
 
 
-        el = checkGetBufferArrayElement(SSD1327Display.WIDTH - 1, 0);
-        Assert.assertEquals(SSD1327Display.WIDTH/2 -1, el);
+        el = checkGetBufferArrayElement(SSD1327.WIDTH - 1, 0);
+        Assert.assertEquals(SSD1327.WIDTH/2 -1, el);
 
         el = checkGetBufferArrayElement(0, 1);
-        Assert.assertEquals(SSD1327Display.WIDTH/2, el);
+        Assert.assertEquals(SSD1327.WIDTH/2, el);
 
 
 
@@ -44,7 +44,7 @@ public class SSD1327DisplayTest {
 
     private int checkGetBufferArrayElement(int i, int i2) {
         int el;
-        el = SSD1327Display.getBufferArrayElementForPixel(i, i2);
+        el = SSD1327.getBufferArrayElementForPixel(i, i2);
         logger.debug("checkGetBufferArrayElement: x{}, y{} -> {}", i, i2, el);
         return el;
     }

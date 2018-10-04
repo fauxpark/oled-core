@@ -8,8 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.awt.image.Raster;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -27,8 +25,6 @@ public class DisplayTest {
 
     static SSDisplay display;
 
-    static BufferedImage image;
-    static Graphics2D graphics;
 
 
     int width = 0;
@@ -57,9 +53,6 @@ public class DisplayTest {
         display.startup(false);
 
         logger.info("-- headless awt setup");
-        // TODO improve for grayscale
-        image = new BufferedImage(width, height, BufferedImage.TYPE_BYTE_BINARY);
-        graphics = image.createGraphics();
 
         logger.debug("<< setUp");
     }
@@ -129,8 +122,7 @@ public class DisplayTest {
     public void testDrawing() throws IOException, InterruptedException {
         logger.debug(">> testDrawing");
 
-        graphics.clearRect(0, 0, width, height);
-        graphics.setColor(Color.WHITE);
+        Graphics2D graphics = display.getGraphics2D();
 
         Font font = new Font("Monospaced", Font.BOLD, 25);
         Font fontSmall = new Font("Serif", Font.BOLD, 12);
@@ -171,7 +163,7 @@ public class DisplayTest {
         graphics.fillPolygon(cross);
 */
         logger.debug("-- raster");
-        rasterAndDisplayImage();
+        display.rasterGraphics2DImage(true);
 
         long start = System.currentTimeMillis();
         display.display();
@@ -185,29 +177,12 @@ public class DisplayTest {
         logger.info(msg);
         graphics.setFont(fontSmall);
         graphics.drawString(msg, 5, 30);
-        rasterAndDisplayImage();
+        display.rasterGraphics2DImage(true);
 
 
         Thread.sleep(1000);
 
         logger.debug("<< testDrawing");
-    }
-
-    private void rasterAndDisplayImage() throws IOException {
-        Raster r = image.getRaster();
-        int sample = 0;
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
-                sample = r.getSample(x, y, 0);
-                // TODO improve for grayscale
-                //if (sample > 0) {
-                    display.setPixel(x, y, (sample > 0));
-                //}
-            }
-        }
-
-        logger.debug("-- display");
-        display.display();
     }
 
     public void testInversionFlipping() throws Exception{

@@ -4,6 +4,8 @@ import net.fauxpark.oled.conn.DisplayConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 
 /**
@@ -14,8 +16,8 @@ import java.io.IOException;
  *
  * https://github.com/olikraus/u8g2/blob/master/csrc/u8x8_d_ssd1327.c
  */
-public class SSD1327Display extends SSDisplay {
-    private static final Logger logger = LoggerFactory.getLogger(SSD1327Display.class);
+public class SSD1327 extends SSDisplay {
+    private static final Logger logger = LoggerFactory.getLogger(SSD1327.class);
 
     public static final int WIDTH = 128;
     public static final int HEIGHT = 128;
@@ -36,7 +38,7 @@ public class SSD1327Display extends SSDisplay {
     public CommandSSD1327 commandset = new CommandSSD1327();
 
 
-    public SSD1327Display(DisplayConnection dspConn) {
+    public SSD1327(DisplayConnection dspConn) {
         super(dspConn, WIDTH, HEIGHT);
         super.commandset = this.commandset;
     }
@@ -259,5 +261,15 @@ public class SSD1327Display extends SSDisplay {
 
             dspConn.data(buffer, rowStart, ROW_SIZE_IN_BYTES * rowsAtOneTime);
         }
+    }
+
+    public Graphics2D getGraphics2D() {
+        if (bufferedImage == null) {
+            bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_BYTE_BINARY);
+            graphics2D = bufferedImage.createGraphics();
+            graphics2D.clearRect(0, 0, width, height);
+            graphics2D.setColor(Color.WHITE);
+        }
+        return graphics2D;
     }
 }

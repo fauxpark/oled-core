@@ -6,10 +6,9 @@ import net.fauxpark.oled.conn.DisplayConnectionMock;
 import net.fauxpark.oled.conn.DisplayConnectionSPI;
 import net.fauxpark.oled.main.DisplayTest;
 import net.fauxpark.oled.main.DisplayTestStartupShutdown;
+import net.fauxpark.oled.main.ExampleFromReadme;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
 
 /**
  * just a dummy main for not always starting junit
@@ -49,10 +48,10 @@ public class Main {
 
         // setup display
         SSDisplay display = null;
-        if ("DSP1306_128_64".equals(displayType)) {
-            display = new SSD1306Display(dspConn, 128, 64);
+        if ("SSD1306_128_64".equals(displayType)) {
+            display = new SSD1306(dspConn, 128, 64);
         } else if ("SSD1327".equals(displayType)) {
-            display = new SSD1327Display(dspConn);
+            display = new SSD1327(dspConn);
         } else {
             System.err.println("unknown display type: " + connectionType);
             System.exit(1);
@@ -63,6 +62,8 @@ public class Main {
         if ("dspTest".equals(routine)) {
             DisplayTest dspTest = new DisplayTest(display);
             dspTest.run();
+        } else if ("exampleFromReadme".equals(routine)) {
+            ExampleFromReadme.main();
         } else if ("dspTestStartStop".equals(routine)) {
             DisplayTestStartupShutdown dspTest = new DisplayTestStartupShutdown(display);
             dspTest.run();
@@ -78,8 +79,8 @@ public class Main {
         System.out.println("\trun.{sh|bat} RoutineName DisplayType [ConnectionType]");
         System.out.println("");
         System.out.println("example:        run.sh dspTest SSD1327");
-        System.out.println("Routine:        dspTest | dspTestStartStop");
-        System.out.println("DisplayType:    DSP1306_128_64 | SSD1327");
+        System.out.println("Routine:        dspTest | exampleFromReadme | dspTestStartStop");
+        System.out.println("DisplayType:    SSD1306_128_64 | SSD1327");
         System.out.println("ConnectionType: I2C | SPI | Mock - default is: " + DEFAULT_CONNECTION_TYPE);
     }
 }
