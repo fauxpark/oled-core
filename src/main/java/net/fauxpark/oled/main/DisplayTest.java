@@ -11,6 +11,8 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class DisplayTest {
     private static final Logger logger = LoggerFactory.getLogger(DisplayTest.class);
@@ -29,11 +31,13 @@ public class DisplayTest {
     static Graphics2D graphics;
 
 
-    static final int width = 128;
-    static final int height = 32;
+    int width = 0;
+    int height = 0;
 
     public DisplayTest(SSDisplay display) {
         this.display = display;
+        width = display.getWidth();
+        height = display.getHeight();
     }
 
     public void run() throws Exception {
@@ -43,7 +47,7 @@ public class DisplayTest {
         testDiagonalLines();
         testDrawing();
         testInversionFlipping();
-        shutdown();
+        //shutdown();
     }
 
     public void setUp() throws IOException {
@@ -53,6 +57,7 @@ public class DisplayTest {
         display.startup(false);
 
         logger.info("-- headless awt setup");
+        // TODO improve for grayscale
         image = new BufferedImage(width, height, BufferedImage.TYPE_BYTE_BINARY);
         graphics = image.createGraphics();
 
@@ -67,24 +72,37 @@ public class DisplayTest {
 
     public void testPatternFilling() throws IOException, InterruptedException {
         logger.info("testRowFilling");
-        for (byte i=0; i<16; i++) {
+        for (byte i=0; i<16; i += 2) {
             byte b = (byte) (i << 4);
             b |= i;
             logger.info("pattern: {}", HexConversionHelper.byteToHex(b));
             display.fillBufferWithPattern(b);
             display.display();
 
-            Thread.sleep(50);
+            //Thread.sleep(50);
         }
         display.clearBuffer();
     }
 
 
     public void testDiagonalLines() throws InterruptedException, IOException {
-        logger.info("testRowFilling");
-        for (int r=0; r<display.getHeight() && r<display.getWidth(); r++) {
+        logger.info("testDiagonalLines");
+        for (int r=0; r<height && r<width; r++) {
             display.setPixel(r, r, true);
-            display.setPixel(display.getWidth() - r -1, r, true);
+            display.setPixel(width/2-1, r, true);
+            display.setPixel(width/2, r, true);
+            display.setPixel(width/2+1, r, true);
+
+            display.setPixel(r, height/2-1, true);
+            display.setPixel(r, height/2, true);
+            display.setPixel(r, height/2+1, true);
+            //display.setPixel(display.getWidth() - r -1, r, true);
+        }
+        int[] bufferAsInt = new int[display.getBuffer().length];
+        int i = 0;
+        for (byte b : display.getBuffer()) {
+            bufferAsInt[i] = b;
+            i++;
         }
         display.display();
         Thread.sleep(2000);
@@ -93,17 +111,19 @@ public class DisplayTest {
 
     public void testRowFilling() throws InterruptedException, IOException {
         logger.info("testRowFilling");
-        for (int fillRow=0; fillRow<display.getHeight(); fillRow += 4) {
+        int step = height / 16;
+        if (step < 4) step = 4;
+        logger.info("draw every {} line", step);
+
+        for (int fillRow=0; fillRow<display.getHeight(); fillRow += 16) {
             logger.info("fill col: {}", fillRow);
 
             for (int c=0; c<display.getWidth(); c++) {
                 display.setPixel(c, fillRow, true);
             }
             display.display();
-            //Thread.sleep(20);
-
         }
-        display.clearBuffer();
+        //display.clearBuffer();
     }
 
     public void testDrawing() throws IOException, InterruptedException {
@@ -111,47 +131,83 @@ public class DisplayTest {
 
         graphics.clearRect(0, 0, width, height);
         graphics.setColor(Color.WHITE);
-        Font font = new Font("Monospaced", Font.BOLD, 30);
+
+        Font font = new Font("Monospaced", Font.BOLD, 25);
+        Font fontSmall = new Font("Serif", Font.BOLD, 12);
+
+        graphics.setFont(fontSmall);
+        graphics.drawString(display.getClass().getSimpleName(), 5, 12);
+
+        SimpleDateFormat df = new SimpleDateFormat("HH:mm:ss");
+        String date = df.format(new Date());
         graphics.setFont(font);
-        graphics.drawString("232", 35, 27);
+        graphics.drawString(date, 0, display.getHeight() - 15);
 
         Polygon check = new Polygon();
-        check.addPoint(5, 15);
-        check.addPoint(13, 23);
-        check.addPoint(27, 9);
-        check.addPoint(24, 6);
-        check.addPoint(13, 17);
-        check.addPoint(8, 12);
+        int ox = width - 25, oy = 5;
+        check.addPoint(ox + 0, oy + 9);
+        check.addPoint(ox + 8, oy + 17);
+        check.addPoint(ox + 22, oy + 3);
+        check.addPoint(ox + 19, oy + 0);
+        check.addPoint(ox + 8, oy + 11);
+        check.addPoint(ox + 3, oy + 6);
+
         graphics.fillPolygon(check);
-
+/*
+        ox = width - 30; oy = 0;
         Polygon cross = new Polygon();
-        cross.addPoint(4, 8);
-        cross.addPoint(12, 16);
-        cross.addPoint(4, 24);
-        cross.addPoint(9, 29);
-        cross.addPoint(17, 21);
-        cross.addPoint(25, 29);
-        cross.addPoint(29, 25);
-        cross.addPoint(21, 17);
-        cross.addPoint(29, 9);
-        cross.addPoint(24, 4);
-        cross.addPoint(16, 12);
-        cross.addPoint(8, 4);
+        cross.addPoint(ox + 4, oy + 8);
+        cross.addPoint(ox + 12, oy + 16);
+        cross.addPoint(ox + 4, oy + 24);
+        cross.addPoint(ox + 9, oy + 29);
+        cross.addPoint(ox + 17, oy + 21);
+        cross.addPoint(ox + 25, oy + 29);
+        cross.addPoint(ox + 29, oy + 25);
+        cross.addPoint(ox + 21, oy + 17);
+        cross.addPoint(ox + 29, oy + 9);
+        cross.addPoint(ox + 24, oy + 4);
+        cross.addPoint(ox + 16, oy + 12);
+        cross.addPoint(ox + 8, oy + 4);
         graphics.fillPolygon(cross);
-
+*/
         logger.debug("-- raster");
+        rasterAndDisplayImage();
+
+        long start = System.currentTimeMillis();
+        display.display();
+        display.display();
+        display.display();
+        long end = System.currentTimeMillis();
+        long duration = end - start;
+        long duration1 = duration / 3;
+
+        String msg = "" + duration1 + " ms per frame";
+        logger.info(msg);
+        graphics.setFont(fontSmall);
+        graphics.drawString(msg, 5, 30);
+        rasterAndDisplayImage();
+
+
+        Thread.sleep(1000);
+
+        logger.debug("<< testDrawing");
+    }
+
+    private void rasterAndDisplayImage() throws IOException {
         Raster r = image.getRaster();
+        int sample = 0;
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
-                display.setPixel(x, y, (r.getSample(x, y, 0) > 0));
+                sample = r.getSample(x, y, 0);
+                // TODO improve for grayscale
+                //if (sample > 0) {
+                    display.setPixel(x, y, (sample > 0));
+                //}
             }
         }
 
         logger.debug("-- display");
         display.display();
-        Thread.sleep(1000);
-
-        logger.debug("<< testDrawing");
     }
 
     public void testInversionFlipping() throws Exception{
@@ -159,13 +215,13 @@ public class DisplayTest {
         // (helping with problem of bitmask interpretation)
         boolean displayInverted = false;
 
-        for (int i = 0; i < 15; i++) {
+        for (int i = 0; i < 4; i++) {
             logger.info("{} - inverted: {}", i, displayInverted );
             display.setInverted(displayInverted);
             displayInverted = ! displayInverted;
             Thread.sleep(INVERSION_FLIP_SLEEP);
         }
 
-
+        display.setInverted(false);
     }
 }
