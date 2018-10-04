@@ -50,9 +50,9 @@ usage:
         run.{sh|bat} RoutineName DisplayType [ConnectionType]
 
 example:        run.sh dspTest SSD1327
-Routine:        dspTest
-DisplayType:    DSP1306_128_64 | SSD1327
-ConnectionType: I2C | SPI - default is: I2C
+Routine:        dspTest | exampleFromReadme | dspTestStartStop
+DisplayType:    SSD1306_128_64 | SSD1327
+ConnectionType: I2C | SPI | Mock - default is: I2C
 ```
 start for example with
 ```bash
