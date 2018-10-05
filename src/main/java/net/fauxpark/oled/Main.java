@@ -82,7 +82,7 @@ public class Main {
         System.out.println("");
         System.out.println("example:        run.sh dspTest SSD1327");
         System.out.println("Routine:        dspTest | exampleFromReadme | dspTestStartStop");
-        System.out.println("DisplayType:    SSD1306_128_64 | SSD1327");
+        System.out.println("DisplayType:    SSD1306_128_64 | SSD1327 | SSD1327AwtMock");
         System.out.println("ConnectionType: I2C | SPI | Mock - default is: " + DEFAULT_CONNECTION_TYPE);
     }
 }

@@ -51,7 +51,7 @@ usage:
 
 example:        run.sh dspTest SSD1327
 Routine:        dspTest | exampleFromReadme | dspTestStartStop
-DisplayType:    SSD1306_128_64 | SSD1327
+DisplayType:    SSD1306_128_64 | SSD1327 | SSD1327AwtMock
 ConnectionType: I2C | SPI | Mock - default is: I2C
 ```
 start for example with
@@ -59,6 +59,10 @@ start for example with
 # ./run.sh dspTest SSD1327 I2C
 ```
 
+or run example on your dev computer (no PI4J required) with the mocking implementation
+```bash
+# ./run.sh dspTest SSD1327AwtMock Mock
+```
 ### Java
 
 To set up the display, simply create a new `SSD1306` object, like so:
@@ -152,6 +156,8 @@ This might not be such a huge problem using sw-displays but might be a limiting 
 The display update of SSD1306 with 128 x 64 px x 1 BPP consumes 1024 bytes.
 
 ## Credits
+Uses Icon from 
+* [Feather Icon by Cole Bemis (MIT License)](https://www.iconfinder.com/colebemis)
 
 Some of this code has been borrowed from 
 * [py-gaugette](https://github.com/guyc/py-gaugette)
