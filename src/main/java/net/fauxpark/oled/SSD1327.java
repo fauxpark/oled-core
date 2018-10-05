@@ -282,12 +282,21 @@ public class SSD1327 extends SSDisplay {
         }
     }
 
+    /**
+     * implement a greyscale-image with antialiasing enabled by default
+     * @return
+     */
+    @Override
     public Graphics2D getGraphics2D() {
         if (bufferedImage == null) {
             bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_BYTE_GRAY);
             graphics2D = bufferedImage.createGraphics();
             graphics2D.clearRect(0, 0, width, height);
-            graphics2D.setColor(Color.lightGray);
+            graphics2D.setColor(Color.WHITE);
+            // enable anti aliasing by default
+            graphics2D.setRenderingHint(
+                    RenderingHints.KEY_ANTIALIASING,
+                    RenderingHints.VALUE_ANTIALIAS_ON);
         }
         return graphics2D;
     }
