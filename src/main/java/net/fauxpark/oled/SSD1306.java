@@ -1,401 +1,132 @@
 package net.fauxpark.oled;
 
-/**
- * A base class for defining implementations of the SSD1306 OLED display.
- *
- * @author fauxpark
- */
-public abstract class SSD1306 {
-	/**
-	 * A helper class for drawing lines, shapes, text and images.
-	 */
-	private Graphics graphics;
+import com.pi4j.io.gpio.Pin;
+import net.fauxpark.oled.conn.DisplayConnection;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-	/**
-	 * The width of the display in pixels.
-	 */
-	protected int width;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 
-	/**
-	 * The height of the display in pixels.
-	 */
-	protected int height;
+public class SSD1306 extends SSDisplay {
+    private static final Logger logger = LoggerFactory.getLogger(SSD1306.class);
+    public static final int COLOR_BITS_PER_PIXEL = 1;
 
-	/**
-	 * The number of pages in the display.
-	 */
-	protected int pages;
+    int pages = 0;
 
-	/**
-	 * The display buffer.
-	 */
-	protected byte[] buffer;
+    public CommandSSD1306 commandset = new CommandSSD1306();
 
-	/**
-	 * Indicates whether the display has been started up.
-	 */
-	private boolean initialised;
 
-	/**
-	 * Indicates whether the display is on or off.
-	 */
-	private boolean displayOn;
 
-	/**
-	 * Indicates whether the display is inverted.
-	 */
-	private boolean inverted;
+    public SSD1306(DisplayConnection dspConn, int width, int height) {
+        super(dspConn, width, height);
+        init();
+    }
 
-	/**
-	 * Indicates whether the display is horizontally flipped.
-	 */
-	private boolean hFlipped;
+    public SSD1306(DisplayConnection dspConn, int width, int height, Pin rstPin) {
+        super(dspConn, width, height, rstPin);
+        init();
+    }
 
-	/**
-	 * Indicates whether the display is vertically flipped.
-	 */
-	private boolean vFlipped;
+    private void init() {
+        pages = height / 8;
+        super.commandset = this.commandset;
+    }
 
-	/**
-	 * Indicates whether the display is currently scrolling.
-	 */
-	private boolean scrolling;
+    /**
+     * Startup specific to 1306
+     *
+     * @param externalVcc Indicates whether the display is being driven by an external power source.
+     */
+    @Override
+    public void startup(boolean externalVcc) throws IOException {
+        logger.debug("startup");
+        reset();
+        setDisplayOn(false);
 
-	/**
-	 * The current contrast level of the display.
-	 */
-	private int contrast;
+        dspConn.command(commandset.SET_DISPLAY_CLOCK_DIV, width);  // from SPI
+        // command(commandset.SET_DISPLAY_CLOCK_DIV, 0x80);    // from I2C
 
-	/**
-	 * The current display offset.
-	 */
-	private int offset;
+        // TODO what´s this for?
+        // command(commandset.SET_MULTIPLEX_RATIO, width - 1);// from SPI
+        dspConn.command(commandset.SET_MULTIPLEX_RATIO, height == 64 ? 0x3F : 0x1F);// from I2C
 
-	/**
-	 * SSD1306 constructor.
-	 *
-	 * @param width The width of the display in pixels.
-	 * @param height The height of the display in pixels.
-	 */
-	public SSD1306(int width, int height) {
-		this.width = width;
-		this.height = height;
-		pages = height / 8;
-		buffer = new byte[width * pages];
-	}
+        setOffset(0);
+        dspConn.command(commandset.SET_START_LINE_00);
+        dspConn.command(commandset.SET_CHARGE_PUMP, externalVcc ? Constant.CHARGE_PUMP_DISABLE : Constant.CHARGE_PUMP_ENABLE);
+        dspConn.command(commandset.SET_MEMORY_MODE, Constant.MEMORY_MODE_HORIZONTAL);
+        setHFlipped(false);
+        setVFlipped(false);
+        dspConn.command(commandset.SET_COM_PINS, height == 64 ? 0x12 : 0x02);
 
-	/**
-	 * Get the initialised state of the display.
-	 */
-	public boolean isInitialised() {
-		return initialised;
-	}
+        setContrast(externalVcc ? 0x9F : 0xCF); // from SPI
+        setContrast(height == 64 ? 0x8F : externalVcc ? 0x9F : 0xCF);   // from I2C
 
-	/**
-	 * Start the power on procedure for the display.
-	 *
-	 * @param externalVcc Indicates whether the display is being driven by an external power source.
-	 */
-	public void startup(boolean externalVcc) {
-		initialised = true;
-	}
+        dspConn.command(commandset.SET_PRECHARGE_PERIOD, externalVcc ? 0x22 : 0xF1);
+        dspConn.command(commandset.SET_VCOMH_DESELECT, Constant.VCOMH_DESELECT_LEVEL_00);
+        dspConn.command(commandset.DISPLAY_MODE_NORMAL);
 
-	/**
-	 * Start the power off procedure for the display.
-	 */
-	public void shutdown() {
-		initialised = false;
-		setInverted(false);
-		setHFlipped(false);
-		setVFlipped(false);
-		stopScroll();
-		setContrast(0);
-		setOffset(0);
-	}
+        super.basicStartup(externalVcc);
+    }
 
-	/**
-	 * Reset the display.
-	 */
-	public abstract void reset();
 
-	/**
-	 * Clear the buffer.
-	 * <br/>
-	 * NOTE: This does not clear the display, you must manually call {@link#display()}.
-	 */
-	public void clear() {
-		buffer = new byte[width * pages];
-	}
+    /**
+     * Set a pixel in the buffer.
+     *
+     * @param x The X position of the pixel to set.
+     * @param y The Y position of the pixel to set.
+     * @param on Whether to turn this pixel on or off.
+     *
+     * @return False if the given coordinates are out of bounds.
+     */
+    public boolean setPixel(int x, int y, boolean on) {
+        if(x < 0 || x >= width || y < 0 || y >= height) {
+            return false;
+        }
 
-	/**
-	 * Send the buffer to the display.
-	 */
-	public abstract void display();
+        if(on) {
+            buffer[x + (y / 8) * width] |= (1 << (y & 7));
+        } else {
+            buffer[x + (y / 8) * width] &= ~(1 << (y & 7));
+        }
 
-	/**
-	 * Get the width of the display.
-	 *
-	 * @return The display width in pixels.
-	 */
-	public int getWidth() {
-		return width;
-	}
+        return true;
+    }
 
-	/**
-	 * Get the height of the display.
-	 *
-	 * @return The display height in pixels.
-	 */
-	public int getHeight() {
-		return height;
-	}
 
-	/**
-	 * Get the display state.
-	 *
-	 * @return True if the display is on.
-	 */
-	public boolean isDisplayOn() {
-		return displayOn;
-	}
+    public byte[] getNewBuffer() {
+        /**
+         * The number of pages in the display.
+         */
+        byte[] buffer = new byte[width * pages];
+        return buffer;
+    }
 
-	/**
-	 * Turn the display on or off.
-	 *
-	 * @param displayOn Whether to turn the display on.
-	 */
-	public void setDisplayOn(boolean displayOn) {
-		this.displayOn = displayOn;
-	}
+    @Override
+    public synchronized void display() throws IOException {
+        dspConn.command(commandset.SET_COLUMN_ADDRESS, 0, width - 1);
+        dspConn.command(commandset.SET_PAGE_ADDRESS, 0, pages - 1);
 
-	/**
-	 * Get the inverted state of the display.
-	 *
-	 * @return Whether the display is inverted or not.
-	 */
-	public boolean isInverted() {
-		return inverted;
-	}
+        super.display();
+    }
 
-	/**
-	 * Invert the display.
-	 * When inverted, an "on" bit in the buffer results in an unlit pixel.
-	 *
-	 * @param inverted Whether to invert the display or return to normal.
-	 */
-	public void setInverted(boolean inverted) {
-		this.inverted = inverted;
-	}
+    public int getColorBitsPerPixel() {
+        return COLOR_BITS_PER_PIXEL;
+    }
 
-	/**
-	 * Get the display contrast.
-	 *
-	 * @return The current contrast level of the display.
-	 */
-	public int getContrast() {
-		return contrast;
-	}
+    @Override
+    public CommandSSD1306 getCommandset() {
+        return new CommandSSD1306();
+    }
 
-	/**
-	 * Set the display contrast.
-	 *
-	 * @param contrast The contrast to set, from 0 to 255.
-	 */
-	public void setContrast(int contrast) {
-		this.contrast = contrast;
-	}
-
-	/**
-	 * Get the display offset.
-	 *
-	 * @return The number of rows the display is offset by.
-	 */
-	public int getOffset() {
-		return offset;
-	}
-
-	/**
-	 * Set the display offset.
-	 *
-	 * @param offset The number of rows to offset the display by.
-	 */
-	public void setOffset(int offset) {
-		this.offset = offset;
-	}
-
-	/**
-	 * Get the scrolling state of the display.
-	 *
-	 * @return Whether the display is scrolling.
-	 */
-	public boolean isScrolling() {
-		return scrolling;
-	}
-
-	/**
-	 * Scroll the display horizontally.
-	 *
-	 * @param direction The direction to scroll, where a value of true results in the display scrolling to the left.
-	 * @param start The start page address, from 0 to 7.
-	 * @param end The end page address, from 0 to 7.
-	 * @param speed The scrolling speed (scroll step).
-	 *
-	 * @see Constant#SCROLL_STEP_5
-	 */
-	public abstract void scrollHorizontally(boolean direction, int start, int end, int speed);
-
-	/**
-	 * Scroll the display horizontally and vertically.
-	 *
-	 * @param direction The direction to scroll, where a value of true results in the display scrolling to the left.
-	 * @param start The start page address, from 0 to 7.
-	 * @param end The end page address, from 0 to 7.
-	 * @param offset The number of rows from the top to start the vertical scroll area at.
-	 * @param rows The number of rows in the vertical scroll area.
-	 * @param speed The scrolling speed (scroll step).
-	 * @param step The number of rows to scroll vertically each frame.
-	 *
-	 * @see Constant#SCROLL_STEP_5
-	 */
-	public abstract void scrollDiagonally(boolean direction, int start, int end, int offset, int rows, int speed, int step);
-
-	/**
-	 * Start scrolling the display.
-	 */
-	public void startScroll() {
-		scrolling = true;
-	}
-
-	/**
-	 * Stop scrolling the display.
-	 */
-	public void stopScroll() {
-		scrolling = false;
-	}
-
-	/**
-	 * No operation.
-	 */
-	public abstract void noOp();
-
-	/**
-	 * Get the horizontal flip state of the display.
-	 *
-	 * @return Whether the display is horizontally flipped.
-	 */
-	public boolean isHFlipped() {
-		return hFlipped;
-	}
-
-	/**
-	 * Flip the display horizontally.
-	 *
-	 * @param hFlipped Whether to flip the display or return to normal.
-	 */
-	public void setHFlipped(boolean hFlipped) {
-		this.hFlipped = hFlipped;
-	}
-
-	/**
-	 * Get the vertical flip state of the display.
-	 *
-	 * @return Whether the display is vertically flipped.
-	 */
-	public boolean isVFlipped() {
-		return vFlipped;
-	}
-
-	/**
-	 * Flip the display vertically.
-	 *
-	 * @param vFlipped Whether to flip the display or return to normal.
-	 */
-	public void setVFlipped(boolean vFlipped) {
-		this.vFlipped = vFlipped;
-	}
-
-	/**
-	 * Get a pixel in the buffer.
-	 *
-	 * @param x The X position of the pixel to set.
-	 * @param y The Y position of the pixel to set.
-	 *
-	 * @return False if the pixel is "off" or the given coordinates are out of bounds, true if the pixel is "on".
-	 */
-	public boolean getPixel(int x, int y) {
-		if(x < 0 || x >= width || y < 0 || y >= height) {
-			return false;
-		}
-
-		return (buffer[x + (y / 8) * width] & (1 << (y & 7))) != 0;
-	}
-
-	/**
-	 * Set a pixel in the buffer.
-	 *
-	 * @param x The X position of the pixel to set.
-	 * @param y The Y position of the pixel to set.
-	 * @param on Whether to turn this pixel on or off.
-	 *
-	 * @return False if the given coordinates are out of bounds.
-	 */
-	public boolean setPixel(int x, int y, boolean on) {
-		if(x < 0 || x >= width || y < 0 || y >= height) {
-			return false;
-		}
-
-		if(on) {
-			buffer[x + (y / 8) * width] |= (1 << (y & 7));
-		} else {
-			buffer[x + (y / 8) * width] &= ~(1 << (y & 7));
-		}
-
-		return true;
-	}
-
-	/**
-	 * Get the display buffer.
-	 *
-	 * @return The display buffer.
-	 */
-	public byte[] getBuffer() {
-		return buffer;
-	}
-
-	/**
-	 * Set the display buffer.
-	 *
-	 * @param buffer The buffer to set.
-	 */
-	public void setBuffer(byte[] buffer) {
-		this.buffer = buffer;
-	}
-
-	/**
-	 * Send a command to the display.
-	 *
-	 * @param command The command to send.
-	 * @param params Any parameters the command requires.
-	 */
-	public abstract void command(int command, int... params);
-
-	/**
-	 * Send pixel data to the display.
-	 *
-	 * @param data The data to send.
-	 */
-	public abstract void data(byte[] data);
-
-	/**
-	 * Get the Graphics instance, creating it if necessary.
-	 *
-	 * @return The Graphics instance.
-	 */
-	public final Graphics getGraphics() {
-		if(graphics == null) {
-			graphics = new Graphics(this);
-		}
-
-		return graphics;
-	}
+    public Graphics2D getGraphics2D() {
+        if (bufferedImage == null) {
+            bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_BYTE_BINARY);
+            graphics2D = bufferedImage.createGraphics();
+            graphics2D.clearRect(0, 0, width, height);
+            graphics2D.setColor(Color.WHITE);
+        }
+        return graphics2D;
+    }
 }

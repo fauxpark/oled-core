@@ -8,22 +8,22 @@ import java.nio.charset.Charset;
 import net.fauxpark.oled.font.Font;
 
 /**
- * A wrapper around the SSD1306 with some basic graphics methods.
+ * A wrapper around the SSDisplay with some basic graphics methods.
  *
  * @author fauxpark
  */
 public class Graphics {
 	/**
-	 * The SSD1306 OLED display.
+	 * The SSDisplay OLED display.
 	 */
-	private SSD1306 ssd1306;
+	private SSDisplay ssd1306;
 
 	/**
 	 * Graphics constructor.
 	 *
-	 * @param ssd1306 The SSD1306 object to use.
+	 * @param ssd1306 The SSDisplay object to use.
 	 */
-	Graphics(SSD1306 ssd1306) {
+	Graphics(SSDisplay ssd1306) {
 		this.ssd1306 = ssd1306;
 	}
 

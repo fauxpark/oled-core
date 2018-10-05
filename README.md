@@ -1,9 +1,23 @@
-# oled-core: SSD1306 in Java
+# oled-core: SSDxxxx in Java
 
-This is a driver for the [Adafruit SSD1306 OLED display](https://www.adafruit.com/categories/98) on the Raspberry Pi, written (almost) completely in Java.
+[![Build Status](https://travis-ci.org/cljk/oled-core.svg?branch=master)](https://travis-ci.org/cljk/oled-core)
+
+This is a driver for Solomon Systech Displays (SSD1306, SSD1327 - f.e. [Adafruit SSD1306 OLED display](https://www.adafruit.com/categories/98) and others) on the Raspberry Pi, written (almost) completely in Java.
 It makes use of the [Pi4J](https://github.com/Pi4J/pi4j) library, which does all the fiddly bits in native code to operate the GPIO pins and drive the SPI and I<sup>2</sup>C interfaces.
 
-The aim of this project is to abstract away the low-level aspects of the SSD1306 and focus on manipulating the contents of the screen through a very simple API.
+The aim of this project is to abstract away the low-level aspects of the SSD and focus on manipulating the contents of the screen through a very simple API.
+
+![example of SSD1327](https://raw.githubusercontent.com/cljk/oled-core/master/src/doc/img/img_001.png)
+
+### Display support
+
+| Device                              | state                |
+|-------------------------------------|----------------------|
+| SSD1306                             | working SPI and I2C  |
+| SSD1327 (128px * 128px * 4bit grey) | in progress          |
+
+Other types should be easy to add if pixel-bitsize is the same
+
 
 ## GPIO Pinout
 
@@ -15,65 +29,106 @@ The pinout for the Raspberry Pi GPIO header is as follows:
 | Voltage In   | 1                   | 1                             |
 | 3v3          | N/C                 | N/C                           |
 | Chip Select  | 24 (CS0) / 26 (CS1) | N/C                           |
-| Reset        | 8 (GPIO_15) / Any   | 8 (GPIO_15) / Any             |
+| Reset        | 8 (GPIO_15) / Any   | 8 (GPIO_15) / Any (or N/C)    |
 | Data/Command | 10 (GPIO_16) / Any  | N/C (0x3D) / GND (0x3C)       |
 | Clock        | 23                  | 5                             |
 | Data         | 19                  | 3                             |
 
-## Getting Started
+## Getting Started 
+
+### Start display test on RPi
+Compile and show valid options (you have to be root to use PI4J GPIO) 
+```bash
+# sudo su
+# mvn compile
+# ./run.sh 
+```
+will (/should) display
+```
+assume classes are already build (with f.e. maven in target/classes)
+usage:
+        run.{sh|bat} RoutineName DisplayType [ConnectionType]
+
+example:        run.sh dspTest SSD1327
+Routine:        dspTest | exampleFromReadme | dspTestStartStop
+DisplayType:    SSD1306_128_64 | SSD1327
+ConnectionType: I2C | SPI | Mock - default is: I2C
+```
+start for example with
+```bash
+# ./run.sh dspTest SSD1327 I2C
+```
+
+### Java
 
 To set up the display, simply create a new `SSD1306` object, like so:
 
 ```java
-SSD1306 ssd1306 = new SSD1306SPIImpl(128, 64, SpiChannel.CS0, RaspiPin.GPIO_15, RaspiPin.GPIO_16);
-// Or:
-SSD1306 ssd1306 = new SSD1306I2CImpl(128, 64, RaspiPin.GPIO_15, I2CBus.BUS_1, 0x3D);
+DisplayConnection dspConn;
+SSDisplay display;
 
-// false indicates no external VCC
-ssd1306.startup(false);
+// choose connection type SPI
+dspConn = new DisplayConnectionSPI();
+
+// or I2C
+dspConn = new DisplayConnectionI2C();
+
+
+// choose display type SSD1306
+display = new SSD1306(dspConn, 128, 64);
+
+// or SSD1327
+display = new SSD1327(dspConn);
+
+
+// call startup
+display.startup(false);
+
+// and start using it..
 
 // Turns the pixel in the top left corner on
-ssd1306.setPixel(0, 0, true);
+display.setPixel(0, 0, true);
 
 // Sends the internal buffer to the display
-ssd1306.display();
+display.display();
 
 // Inverts the display
-ssd1306.setInverted(true);
-
-// Flips the display upside down
-ssd1306.setVFlipped(true);
+display.setInverted(true);
 ```
-
-If you are testing on something other than a Raspberry Pi, you can use the `SSD1306MockImpl` class instead to mostly simulate the display without Pi4J complaining about your platform. However, some features will not be available (such as scrolling, as it is done by the display itself).
 
 Most properties of the display (eg. invertedness, display on/off) are reachable through getters and setters.
-As the SSD1306 does not provide any information as to its state, these are implemented as fields in the `SSD1306` class.
+As the SSD controllers do not provide any information as to its state, these are implemented as fields in the `SSD1306` class.
 
-## Basic Graphics
+## 2D Graphics with AWT
 
-You can also do some basic line & shape drawing using the `Graphics` class.
-Just call the `getGraphics()` method on the SSD1306 instance:
+You can also do line & shape drawing using the `Graphics2D` class from `java.awt`.
+Just call the `getGraphics2D()` method on the `SSDisplay` instance:
 
 ```java
-SSD1306 ssd1306 = new SSD1306SPIImpl(128, 64, SpiChannel.CS0, RaspiPin.GPIO_15, RaspiPin.GPIO_16);
-Graphics graphics = ssd1306.getGraphics();
+// SSDisplay display = new SSD1306(dspConn, 128, 64);
+SSDisplay display = new SSD1327(new DisplayConnectionI2C());
+display.startup(false);
 
-ssd1306.startup(false);
+// make use of Java AWT Graphics2D
+Graphics2D graphics = display.getGraphics2D();
 
 // Draws a line from the top left to the bottom right of the display
-graphics.line(0, 0, 127, 63);
+graphics.drawRect(0, 0, display.getWidth()-1, display.getHeight()-1);
 
 // Draws an arc from (63,31) with a radius of 8 pixels and an angle of 15 degrees
-graphics.arc(63, 31, 8, 0, 15);
+graphics.drawArc(display.getWidth() -25, 10, 30,30, 0, 360);
 
 // Writes "Hello world!" at (20,20) using the Windows-1252 charset
-graphics.text(20, 20, new CodePage1252(), "Hello world!");
+Font font = new Font("Serif", Font.BOLD, 18);
+graphics.setFont(font);
+graphics.drawString( "Hello world!", 5, 20);
+
+display.rasterGraphics2DImage(true);
 ```
 
-## Text Rendering
+## Legacy Text Rendering
 
-As you can see above, this library can draw text onto the screen. It is also possible to change the character set.
+This library can draw text onto the screen (wihtout using `java.awt`). It is also possible to change the character set.
 
 Currently three character sets are supported:
 
@@ -83,8 +138,28 @@ Currently three character sets are supported:
 
 In addition, it is possible to create your own character sets by implementing `Font` and specifying the number of rows and columns, and the array of glyph data. Refer to the `Font` JavaDoc for an explanation on how the glyphs are encoded.
 
-### Credits
+## Issues
 
-Some of this code has been borrowed from [py-gaugette](https://github.com/guyc/py-gaugette), [pi-ssd1306-java](https://github.com/ondryaso/pi-ssd1306-java), and [raspberry-pi4j-samples](https://github.com/OlivierLD/raspberry-pi4j-samples/).
+### I2C Mode (& grey-scale displays - like SDD1327)
+
+Because of the larger amounts of data needed to transfer on every display update
+when using grayscale-displays
+(f.e. the SDD1327 has 128 x 128 pixel x 4 bits per pixel = 8129 bytes), perhaps you may consider speeding up your I2C bus from default 100 kHz to 400 kHz.
+
+Refer to [https://www.raspberrypi-spy.co.uk/2018/02/change-raspberry-pi-i2c-bus-speed/](https://www.raspberrypi-spy.co.uk/2018/02/change-raspberry-pi-i2c-bus-speed/)
+
+This might not be such a huge problem using sw-displays but might be a limiting factor there too.
+The display update of SSD1306 with 128 x 64 px x 1 BPP consumes 1024 bytes.
+
+## Credits
+
+Some of this code has been borrowed from 
+* [py-gaugette](https://github.com/guyc/py-gaugette)
+* [pi-ssd1306-java](https://github.com/ondryaso/pi-ssd1306-java)
+* [raspberry-pi4j-samples](https://github.com/OlivierLD/raspberry-pi4j-samples/)
+
+Essential basis from
+* [PI4J](http://pi4j.com/)
+
 
 The glyph data for the CP437 character set has been modified somewhat but appears to have originated from the [Adafruit GFX Library](https://github.com/adafruit/Adafruit-GFX-Library).
