@@ -7,7 +7,9 @@ import net.fauxpark.oled.misc.HexConversionHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.imageio.ImageIO;
 import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -166,6 +168,15 @@ public class DisplayTest {
         cross.addPoint(ox + 8, oy + 4);
         graphics.fillPolygon(cross);
 */
+        // load PNG image
+        if (display.getHeight() > 60) {
+            BufferedImage img = ImageIO.read(
+                    getClass().getClassLoader().getResourceAsStream(
+                            "if_calendar_2561349.png"));
+            graphics.drawImage(img, 0, display.getHeight()-50, 20, 20,null);
+        }
+
+
         logger.debug("-- raster");
         display.rasterGraphics2DImage(true);
 
