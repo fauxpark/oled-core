@@ -21,7 +21,7 @@ public class DisplayConnectionMock extends DisplayConnection {
     /**
      * minimal constructor - will use DEFAULT_I2C_BUS_ID and DEFAULT_I2C_ADDRESS
      */
-    public DisplayConnectionMock() throws IOException {
+    public DisplayConnectionMock() {
         logger.info("init mock");
     }
 

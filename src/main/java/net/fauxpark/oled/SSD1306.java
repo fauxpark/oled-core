@@ -120,6 +120,7 @@ public class SSD1306 extends SSDisplay {
         return new CommandSSD1306();
     }
 
+    @Override
     public Graphics2D getGraphics2D() {
         if (bufferedImage == null) {
             bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_BYTE_BINARY);

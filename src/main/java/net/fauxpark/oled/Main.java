@@ -52,8 +52,10 @@ public class Main {
             display = new SSD1306(dspConn, 128, 64);
         } else if ("SSD1327".equals(displayType)) {
             display = new SSD1327(dspConn);
+        } else if ("SSD1327AwtMock".equals(displayType)) {
+            display = new SSD1327AwtMock();
         } else {
-            System.err.println("unknown display type: " + connectionType);
+            System.err.println("unknown display type: " + displayType);
             System.exit(1);
         }
 
