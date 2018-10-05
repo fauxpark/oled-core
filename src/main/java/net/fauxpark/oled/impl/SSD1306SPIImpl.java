@@ -140,18 +140,14 @@ public class SSD1306SPIImpl extends SSD1306 {
 
 	@Override
 	public void setContrast(int contrast) {
-		if(contrast < 0 || contrast > 255) {
-			return;
-		}
-
 		super.setContrast(contrast);
-		command(Command.SET_CONTRAST, contrast);
+		command(Command.SET_CONTRAST, getContrast());
 	}
 
 	@Override
 	public void setOffset(int offset) {
 		super.setOffset(offset);
-		command(Command.SET_DISPLAY_OFFSET, offset);
+		command(Command.SET_DISPLAY_OFFSET, getOffset());
 	}
 
 	@Override
