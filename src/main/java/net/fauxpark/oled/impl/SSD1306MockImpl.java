@@ -70,19 +70,19 @@ public class SSD1306MockImpl extends SSD1306 {
 
 	@Override
 	public void setDisplayOn(boolean displayOn) {
+		super.setDisplayOn(displayOn);
+
 		if(displayOn) {
 			command(Command.DISPLAY_ON);
 		} else {
 			command(Command.DISPLAY_OFF);
 		}
-
-		super.setDisplayOn(displayOn);
 	}
 
 	@Override
 	public void setInverted(boolean inverted) {
-		command(inverted ? Command.INVERT_DISPLAY : Command.NORMAL_DISPLAY);
 		super.setInverted(inverted);
+		command(inverted ? Command.INVERT_DISPLAY : Command.NORMAL_DISPLAY);
 	}
 
 	@Override
@@ -91,18 +91,20 @@ public class SSD1306MockImpl extends SSD1306 {
 			return;
 		}
 
-		command(Command.SET_CONTRAST, contrast);
 		super.setContrast(contrast);
+		command(Command.SET_CONTRAST, contrast);
 	}
 
 	@Override
 	public void setOffset(int offset) {
-		command(Command.SET_DISPLAY_OFFSET, offset);
 		super.setOffset(offset);
+		command(Command.SET_DISPLAY_OFFSET, offset);
 	}
 
 	@Override
 	public void setHFlipped(boolean hFlipped) {
+		super.setHFlipped(hFlipped);
+
 		if(hFlipped) {
 			command(Command.SET_SEGMENT_REMAP);
 		} else {
@@ -111,18 +113,17 @@ public class SSD1306MockImpl extends SSD1306 {
 
 		// Horizontal flipping is not immediate
 		display();
-		super.setHFlipped(hFlipped);
 	}
 
 	@Override
 	public void setVFlipped(boolean vFlipped) {
+		super.setVFlipped(vFlipped);
+
 		if(vFlipped) {
 			command(Command.SET_COM_SCAN_INC);
 		} else {
 			command(Command.SET_COM_SCAN_DEC);
 		}
-
-		super.setVFlipped(vFlipped);
 	}
 
 	@Override
@@ -138,14 +139,14 @@ public class SSD1306MockImpl extends SSD1306 {
 
 	@Override
 	public void startScroll() {
-		command(Command.ACTIVATE_SCROLL);
 		super.startScroll();
+		command(Command.ACTIVATE_SCROLL);
 	}
 
 	@Override
 	public void stopScroll() {
-		command(Command.DEACTIVATE_SCROLL);
 		super.stopScroll();
+		command(Command.DEACTIVATE_SCROLL);
 	}
 
 	@Override
