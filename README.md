@@ -9,16 +9,16 @@ The aim of this project is to abstract away the low-level aspects of the SSD1306
 
 The pinout for the Raspberry Pi GPIO header is as follows:
 
-| Display Pin  | Physical Pin (SPI)  | Physical Pin (I<sup>2</sup>C) |
-| ------------:|:------------------- |:----------------------------- |
-| Ground       | 6                   | 6                             |
-| Voltage In   | 1                   | 1                             |
-| 3v3          | N/C                 | N/C                           |
-| Chip Select  | 24 (CS0) / 26 (CS1) | N/C                           |
-| Reset        | 8 (GPIO_15) / Any   | 8 (GPIO_15) / Any             |
-| Data/Command | 10 (GPIO_16) / Any  | N/C (0x3D) / GND (0x3C)       |
-| Clock        | 23                  | 5                             |
-| Data         | 19                  | 3                             |
+| Display Pin  | Physical Pin (SPI)      | Physical Pin (I<sup>2</sup>C)  |
+| ------------:|:----------------------- |:------------------------------ |
+| Ground       | 6                       | 6                              |
+| Voltage In   | 1                       | 1                              |
+| 3v3          | N/C                     | N/C                            |
+| Chip Select  | 24 (`CS0`) / 26 (`CS1`) | N/C                            |
+| Reset        | 8 (`GPIO_15`) / Any     | 8 (`GPIO_15`) / Any            |
+| Data/Command | 10 (`GPIO_16`) / Any    | N/C (`0x3D`) / Ground (`0x3C`) |
+| Clock        | 23                      | 5                              |
+| Data         | 19                      | 3                              |
 
 ## Getting Started
 
