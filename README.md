@@ -22,6 +22,8 @@ The pinout for the Raspberry Pi GPIO header is as follows:
 
 ## Getting Started
 
+First, you may need to install WiringPi, as Pi4J depends on it. On Raspbian, you should be able to install it using `sudo apt-get install wiringpi`.
+
 To set up the display, simply create a new `SSD1306` object, like so:
 
 ```java
