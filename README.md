@@ -24,12 +24,14 @@ The pinout for the Raspberry Pi GPIO header is as follows:
 
 First, you may need to install WiringPi, as Pi4J depends on it. On Raspbian, you should be able to install it using `sudo apt-get install wiringpi`.
 
-To set up the display, simply create a new `SSD1306` object, like so:
+To set up the display, simply create a new `Transport` object, and pass it to an `SSD1306` object, like so:
 
 ```java
-SSD1306 ssd1306 = new SSD1306SPIImpl(128, 64, SpiChannel.CS0, RaspiPin.GPIO_15, RaspiPin.GPIO_16);
+Transport transport = new I2CTransport(RaspiPin.GPIO_15, I2CBus.BUS_1, 0x3D);
 // Or:
-SSD1306 ssd1306 = new SSD1306I2CImpl(128, 64, RaspiPin.GPIO_15, I2CBus.BUS_1, 0x3D);
+Transport transport = new SPITransport(SpiChannel.CS0, RaspiPin.GPIO_15, RaspiPin.GPIO_16);
+
+SSD1306 ssd1306 = new SSD1306(128, 64, transport);
 
 // false indicates no external VCC
 ssd1306.startup(false);
@@ -47,7 +49,7 @@ ssd1306.setInverted(true);
 ssd1306.setVFlipped(true);
 ```
 
-If you are testing on something other than a Raspberry Pi, you can use the `SSD1306MockImpl` class instead to mostly simulate the display without Pi4J complaining about your platform. However, some features will not be available (such as scrolling, as it is done by the display itself).
+If you are testing on something other than a Raspberry Pi, you can use the `MockTransport` class instead to mostly simulate the display without Pi4J complaining about your platform. However, some features will not be available (such as scrolling, as it is done by the display itself).
 
 Most properties of the display (eg. invertedness, display on/off) are reachable through getters and setters.
 As the SSD1306 does not provide any information as to its state, these are implemented as fields in the `SSD1306` class.
@@ -58,7 +60,8 @@ You can also do some basic line & shape drawing using the `Graphics` class.
 Just call the `getGraphics()` method on the SSD1306 instance:
 
 ```java
-SSD1306 ssd1306 = new SSD1306SPIImpl(128, 64, SpiChannel.CS0, RaspiPin.GPIO_15, RaspiPin.GPIO_16);
+Transport transport = new SPITransport(SpiChannel.CS0, RaspiPin.GPIO_15, RaspiPin.GPIO_16);
+SSD1306 ssd1306 = new SSD1306(128, 64, transport);
 Graphics graphics = ssd1306.getGraphics();
 
 ssd1306.startup(false);
