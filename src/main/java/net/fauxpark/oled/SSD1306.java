@@ -109,7 +109,7 @@ public class SSD1306 {
 		reset();
 		setDisplayOn(false);
 		command(Command.SET_DISPLAY_CLOCK_DIV, width);
-		command(Command.SET_MULTIPLEX_RATIO, width - 1);
+		command(Command.SET_MULTIPLEX_RATIO, height - 1);
 		setOffset(0);
 		command(Command.SET_START_LINE_00);
 		command(Command.SET_CHARGE_PUMP, externalVcc ? Constant.CHARGE_PUMP_DISABLE : Constant.CHARGE_PUMP_ENABLE);
