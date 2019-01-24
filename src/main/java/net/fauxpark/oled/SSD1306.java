@@ -111,7 +111,7 @@ public class SSD1306 {
 		command(Command.SET_DISPLAY_CLOCK_DIV, width);
 		command(Command.SET_MULTIPLEX_RATIO, height - 1);
 		setOffset(0);
-		command(Command.SET_START_LINE_00);
+		command(Command.SET_START_LINE | 0);
 		command(Command.SET_CHARGE_PUMP, externalVcc ? Constant.CHARGE_PUMP_DISABLE : Constant.CHARGE_PUMP_ENABLE);
 		command(Command.SET_MEMORY_MODE, Constant.MEMORY_MODE_HORIZONTAL);
 		setHFlipped(false);
