@@ -253,12 +253,7 @@ public class SSD1306 {
 	 * @param contrast The contrast to set, from 0 to 255. Values outside of this range will be clamped.
 	 */
 	public void setContrast(int contrast) {
-		if(contrast < 0) {
-			contrast = 0;
-		} else if(contrast > 255) {
-			contrast = 255;
-		}
-
+		contrast = clamp(0, 255, contrast);
 		this.contrast = contrast;
 		command(Command.SET_CONTRAST, contrast);
 	}
@@ -278,12 +273,7 @@ public class SSD1306 {
 	 * @param offset The number of rows to offset the display by. Values outside of this range will be clamped.
 	 */
 	public void setOffset(int offset) {
-		if(offset < 0) {
-			offset = 0;
-		} else if(offset > height - 1) {
-			offset = height - 1;
-		}
-
+		offset = clamp(0, height - 1, offset);
 		this.offset = offset;
 		command(Command.SET_DISPLAY_OFFSET, offset);
 	}
@@ -490,5 +480,24 @@ public class SSD1306 {
 		}
 
 		return graphics;
+	}
+
+	/**
+	 * Clamp the given value to a specified range.
+	 *
+	 * @param min The minimum value.
+	 * @param max The maximum value.
+	 * @param value The value to clamp.
+	 *
+	 * @return The value clamped to the minimum and maximum values.
+	 */
+	private int clamp(int min, int max, int value) {
+		if(value < min) {
+			return min;
+		} else if(value > max) {
+			return max;
+		}
+
+		return value;
 	}
 }
