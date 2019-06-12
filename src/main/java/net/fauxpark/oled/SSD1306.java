@@ -116,7 +116,7 @@ public class SSD1306 {
 		command(Command.SET_MEMORY_MODE, Constant.MEMORY_MODE_HORIZONTAL);
 		setHFlipped(false);
 		setVFlipped(false);
-		command(Command.SET_COM_PINS, height == 64 ? 0x12 : 0x02);
+		command(Command.SET_COM_PINS, height == 64 ? Constant.COM_PINS_ALTERNATING : Constant.COM_PINS_SEQUENTIAL);
 		setContrast(externalVcc ? 0x9F : 0xCF);
 		command(Command.SET_PRECHARGE_PERIOD, externalVcc ? 0x22 : 0xF1);
 		command(Command.SET_VCOMH_DESELECT, Constant.VCOMH_DESELECT_LEVEL_00);
