@@ -44,26 +44,6 @@ public class SSD1306 {
 	private boolean initialised;
 
 	/**
-	 * Indicates whether the display is on or off.
-	 */
-	private boolean displayOn;
-
-	/**
-	 * Indicates whether the display is inverted.
-	 */
-	private boolean inverted;
-
-	/**
-	 * Indicates whether the display is horizontally flipped.
-	 */
-	private boolean hFlipped;
-
-	/**
-	 * Indicates whether the display is vertically flipped.
-	 */
-	private boolean vFlipped;
-
-	/**
 	 * Indicates whether the display is currently scrolling.
 	 */
 	private boolean scrolling;
@@ -72,6 +52,26 @@ public class SSD1306 {
 	 * The current contrast level of the display.
 	 */
 	private int contrast;
+
+	/**
+	 * Indicates whether the display is horizontally flipped.
+	 */
+	private boolean hFlipped;
+
+	/**
+	 * Indicates whether the display is inverted.
+	 */
+	private boolean inverted;
+
+	/**
+	 * Indicates whether the display is on or off.
+	 */
+	private boolean displayOn;
+
+	/**
+	 * Indicates whether the display is vertically flipped.
+	 */
+	private boolean vFlipped;
 
 	/**
 	 * The current display offset.
@@ -195,100 +195,6 @@ public class SSD1306 {
 	}
 
 	/**
-	 * Get the display state.
-	 *
-	 * @return True if the display is on.
-	 */
-	public boolean isDisplayOn() {
-		return displayOn;
-	}
-
-	/**
-	 * Turn the display on or off.
-	 *
-	 * @param displayOn Whether to turn the display on.
-	 */
-	public void setDisplayOn(boolean displayOn) {
-		this.displayOn = displayOn;
-
-		if(displayOn) {
-			command(Command.DISPLAY_ON);
-		} else {
-			command(Command.DISPLAY_OFF);
-		}
-	}
-
-	/**
-	 * Get the inverted state of the display.
-	 *
-	 * @return Whether the display is inverted or not.
-	 */
-	public boolean isInverted() {
-		return inverted;
-	}
-
-	/**
-	 * Invert the display.
-	 * When inverted, an "on" bit in the buffer results in an unlit pixel.
-	 *
-	 * @param inverted Whether to invert the display or return to normal.
-	 */
-	public void setInverted(boolean inverted) {
-		this.inverted = inverted;
-		command(inverted ? Command.INVERT_DISPLAY : Command.NORMAL_DISPLAY);
-	}
-
-	/**
-	 * Get the display contrast.
-	 *
-	 * @return The current contrast level of the display.
-	 */
-	public int getContrast() {
-		return contrast;
-	}
-
-	/**
-	 * Set the display contrast.
-	 *
-	 * @param contrast The contrast to set, from 0 to 255. Values outside of this range will be clamped.
-	 */
-	public void setContrast(int contrast) {
-		contrast = clamp(0, 255, contrast);
-		this.contrast = contrast;
-		command(Command.SET_CONTRAST, contrast);
-	}
-
-	/**
-	 * Get the display offset.
-	 *
-	 * @return The number of rows the display is offset by.
-	 */
-	public int getOffset() {
-		return offset;
-	}
-
-	/**
-	 * Set the display offset.
-	 *
-	 * @param offset The number of rows to offset the display by. Values outside of this range will be clamped.
-	 */
-	public void setOffset(int offset) {
-		offset = clamp(0, height - 1, offset);
-		this.offset = offset;
-		command(Command.SET_DISPLAY_OFFSET, offset);
-	}
-
-	/**
-	 * Set the display start line.
-	 *
-	 * @param startLine The row to begin displaying at.
-	 */
-	public void setStartLine(int startLine) {
-		startLine = clamp(0, height - 1, startLine);
-		command(Command.SET_START_LINE | startLine);
-	}
-
-	/**
 	 * Get the scrolling state of the display.
 	 *
 	 * @return Whether the display is scrolling.
@@ -330,14 +236,6 @@ public class SSD1306 {
 	}
 
 	/**
-	 * Start scrolling the display.
-	 */
-	public void startScroll() {
-		scrolling = true;
-		command(Command.ACTIVATE_SCROLL);
-	}
-
-	/**
 	 * Stop scrolling the display.
 	 */
 	public void stopScroll() {
@@ -346,10 +244,41 @@ public class SSD1306 {
 	}
 
 	/**
-	 * No operation.
+	 * Start scrolling the display.
 	 */
-	public void noOp() {
-		command(Command.NOOP);
+	public void startScroll() {
+		scrolling = true;
+		command(Command.ACTIVATE_SCROLL);
+	}
+
+	/**
+	 * Set the display start line.
+	 *
+	 * @param startLine The row to begin displaying at.
+	 */
+	public void setStartLine(int startLine) {
+		startLine = clamp(0, height - 1, startLine);
+		command(Command.SET_START_LINE | startLine);
+	}
+
+	/**
+	 * Get the display contrast.
+	 *
+	 * @return The current contrast level of the display.
+	 */
+	public int getContrast() {
+		return contrast;
+	}
+
+	/**
+	 * Set the display contrast.
+	 *
+	 * @param contrast The contrast to set, from 0 to 255. Values outside of this range will be clamped.
+	 */
+	public void setContrast(int contrast) {
+		contrast = clamp(0, 255, contrast);
+		this.contrast = contrast;
+		command(Command.SET_CONTRAST, contrast);
 	}
 
 	/**
@@ -380,6 +309,50 @@ public class SSD1306 {
 	}
 
 	/**
+	 * Get the inverted state of the display.
+	 *
+	 * @return Whether the display is inverted or not.
+	 */
+	public boolean isInverted() {
+		return inverted;
+	}
+
+	/**
+	 * Invert the display.
+	 * When inverted, an "on" bit in the buffer results in an unlit pixel.
+	 *
+	 * @param inverted Whether to invert the display or return to normal.
+	 */
+	public void setInverted(boolean inverted) {
+		this.inverted = inverted;
+		command(inverted ? Command.INVERT_DISPLAY : Command.NORMAL_DISPLAY);
+	}
+
+	/**
+	 * Get the display state.
+	 *
+	 * @return True if the display is on.
+	 */
+	public boolean isDisplayOn() {
+		return displayOn;
+	}
+
+	/**
+	 * Turn the display on or off.
+	 *
+	 * @param displayOn Whether to turn the display on.
+	 */
+	public void setDisplayOn(boolean displayOn) {
+		this.displayOn = displayOn;
+
+		if(displayOn) {
+			command(Command.DISPLAY_ON);
+		} else {
+			command(Command.DISPLAY_OFF);
+		}
+	}
+
+	/**
 	 * Get the vertical flip state of the display.
 	 *
 	 * @return Whether the display is vertically flipped.
@@ -401,6 +374,33 @@ public class SSD1306 {
 		} else {
 			command(Command.SET_COM_SCAN_DEC);
 		}
+	}
+
+	/**
+	 * Get the display offset.
+	 *
+	 * @return The number of rows the display is offset by.
+	 */
+	public int getOffset() {
+		return offset;
+	}
+
+	/**
+	 * Set the display offset.
+	 *
+	 * @param offset The number of rows to offset the display by. Values outside of this range will be clamped.
+	 */
+	public void setOffset(int offset) {
+		offset = clamp(0, height - 1, offset);
+		this.offset = offset;
+		command(Command.SET_DISPLAY_OFFSET, offset);
+	}
+
+	/**
+	 * No operation.
+	 */
+	public void noOp() {
+		command(Command.NOOP);
 	}
 
 	/**
