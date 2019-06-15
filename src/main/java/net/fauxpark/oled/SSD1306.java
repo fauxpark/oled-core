@@ -111,7 +111,7 @@ public class SSD1306 {
 		command(Command.SET_DISPLAY_CLOCK_DIV, width);
 		command(Command.SET_MULTIPLEX_RATIO, height - 1);
 		setOffset(0);
-		command(Command.SET_START_LINE | 0);
+		setStartLine(0);
 		command(Command.SET_CHARGE_PUMP, externalVcc ? Constant.CHARGE_PUMP_DISABLE : Constant.CHARGE_PUMP_ENABLE);
 		command(Command.SET_MEMORY_MODE, Constant.MEMORY_MODE_HORIZONTAL);
 		setHFlipped(false);
@@ -276,6 +276,16 @@ public class SSD1306 {
 		offset = clamp(0, height - 1, offset);
 		this.offset = offset;
 		command(Command.SET_DISPLAY_OFFSET, offset);
+	}
+
+	/**
+	 * Set the display start line.
+	 *
+	 * @param startLine The row to begin displaying at.
+	 */
+	public void setStartLine(int startLine) {
+		startLine = clamp(0, height - 1, startLine);
+		command(Command.SET_START_LINE | startLine);
 	}
 
 	/**
