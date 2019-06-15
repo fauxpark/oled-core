@@ -44,9 +44,29 @@ public class SSD1306 {
 	private boolean initialised;
 
 	/**
+	 * The lower column start address for page addressing mode.
+	 */
+	private int lowerColStart;
+
+	/**
+	 * The higher column start address for page addressing mode.
+	 */
+	private int higherColStart;
+
+	/**
+	 * The memory addressing mode of the display.
+	 */
+	private int memoryMode;
+
+	/**
 	 * Indicates whether the display is currently scrolling.
 	 */
 	private boolean scrolling;
+
+	/**
+	 * The starting row of the display buffer.
+	 */
+	private int startLine;
 
 	/**
 	 * The current contrast level of the display.
@@ -69,6 +89,11 @@ public class SSD1306 {
 	private boolean displayOn;
 
 	/**
+	 * The starting page of the display for page addressing mode.
+	 */
+	private int startPage;
+
+	/**
 	 * Indicates whether the display is vertically flipped.
 	 */
 	private boolean vFlipped;
@@ -77,6 +102,11 @@ public class SSD1306 {
 	 * The current display offset.
 	 */
 	private int offset;
+
+	/**
+	 * The hardware configuration of the display's COM pins.
+	 */
+	private int comPins;
 
 	/**
 	 * SSD1306 constructor.
@@ -113,10 +143,10 @@ public class SSD1306 {
 		setOffset(0);
 		setStartLine(0);
 		command(Command.SET_CHARGE_PUMP, externalVcc ? Constant.CHARGE_PUMP_DISABLE : Constant.CHARGE_PUMP_ENABLE);
-		command(Command.SET_MEMORY_MODE, Constant.MEMORY_MODE_HORIZONTAL);
+		setMemoryMode(Constant.MEMORY_MODE_HORIZONTAL);
 		setHFlipped(false);
 		setVFlipped(false);
-		command(Command.SET_COM_PINS, height == 64 ? Constant.COM_PINS_ALTERNATING : Constant.COM_PINS_SEQUENTIAL);
+		setCOMPinsConfiguration(height == 64 ? Constant.COM_PINS_ALTERNATING : Constant.COM_PINS_SEQUENTIAL);
 		setContrast(externalVcc ? 0x9F : 0xCF);
 		command(Command.SET_PRECHARGE_PERIOD, externalVcc ? 0x22 : 0xF1);
 		command(Command.SET_VCOMH_DESELECT, Constant.VCOMH_DESELECT_LEVEL_00);
@@ -195,6 +225,67 @@ public class SSD1306 {
 	}
 
 	/**
+	 * Get the lower column start address for page addressing mode.
+	 *
+	 * @return The lower column start address, from 0 to 15.
+	 */
+	public int getLowerColStart() {
+		return lowerColStart;
+	}
+
+	/**
+	 * Set the lower column start address for page addressing mode.
+	 *
+	 * @param lowerColStart The lower column start address, from 0 to 15. Values outside this range will be clamped.
+	 */
+	public void setLowerColStart(int lowerColStart) {
+		lowerColStart = clamp(0, 15, lowerColStart);
+		this.lowerColStart = lowerColStart;
+		command(Command.SET_LOWER_COL_START | lowerColStart);
+	}
+
+	/**
+	 * Get the higher column start address for page addressing mode.
+	 *
+	 * @return The higher column start address, from 0 to 15.
+	 */
+	public int getHigherColStart() {
+		return higherColStart;
+	}
+
+	/**
+	 * Set the higher column start address for page addressing mode.
+	 *
+	 * @param higherColStart The higher column start address, from 0 to 15. Values outside this range will be clamped.
+	 */
+	public void setHigherColStart(int higherColStart) {
+		higherColStart = clamp(0, 15, higherColStart);
+		this.higherColStart = higherColStart;
+		command(Command.SET_HIGHER_COL_START | higherColStart);
+	}
+
+	/**
+	 * Get the memory addressing mode.
+	 *
+	 * @return The current memory mode, either {@link Constant.MEMORY_MODE_HORIZONTAL}, {@link Constant.MEMORY_MODE_VERTICAL}, or {@link Constant.MEMORY_MODE_PAGE}.
+	 */
+	public int getMemoryMode() {
+		return memoryMode;
+	}
+
+	/**
+	 * Set the memory addressing mode.
+	 *
+	 * @param memoryMode The memory mode to set. Must be one of {@link Constant.MEMORY_MODE_HORIZONTAL}, {@link Constant.MEMORY_MODE_VERTICAL}, or {@link Constant.MEMORY_MODE_PAGE}.
+	 */
+	public void setMemoryMode(int memoryMode) {
+		if(memoryMode == Constant.MEMORY_MODE_HORIZONTAL || memoryMode == Constant.MEMORY_MODE_VERTICAL || memoryMode == Constant.MEMORY_MODE_PAGE) {
+			this.memoryMode = memoryMode;
+			command(Command.SET_MEMORY_MODE, memoryMode);
+		}
+	}
+
+	/**
 	 * Get the scrolling state of the display.
 	 *
 	 * @return Whether the display is scrolling.
@@ -252,12 +343,22 @@ public class SSD1306 {
 	}
 
 	/**
+	 * Get the display start line.
+	 *
+	 * @return The row to begin displaying at.
+	 */
+	public int getStartLine() {
+		return startLine;
+	}
+
+	/**
 	 * Set the display start line.
 	 *
 	 * @param startLine The row to begin displaying at.
 	 */
 	public void setStartLine(int startLine) {
 		startLine = clamp(0, height - 1, startLine);
+		this.startLine = startLine;
 		command(Command.SET_START_LINE | startLine);
 	}
 
@@ -353,6 +454,26 @@ public class SSD1306 {
 	}
 
 	/**
+	 * Get the starting page for page addressing mode.
+	 *
+	 * @return The page to begin displaying at, from 0 to 7.
+	 */
+	public int getStartPage() {
+		return startPage;
+	}
+
+	/**
+	 * Set the starting page for page addressing mode.
+	 *
+	 * @param startPage The page to begin displaying at, from 0 to 7. Values outside this range will be clamped.
+	 */
+	public void setStartPage(int startPage) {
+		startPage = clamp(0, 7, startPage);
+		this.startPage = startPage;
+		command(Command.SET_PAGE_START_ADDR | startPage);
+	}
+
+	/**
 	 * Get the vertical flip state of the display.
 	 *
 	 * @return Whether the display is vertically flipped.
@@ -394,6 +515,27 @@ public class SSD1306 {
 		offset = clamp(0, height - 1, offset);
 		this.offset = offset;
 		command(Command.SET_DISPLAY_OFFSET, offset);
+	}
+
+	/**
+	 * Get hardware configuration of the display's COM pins.
+	 *
+	 * @return The COM pins configuration, one of {@link Constant.COM_PINS_SEQUENTIAL}, {@link Constant.COM_PINS_SEQUENTIAL_LR}, {@link Constant.COM_PINS_ALTERNATING} or {@link Constant.COM_PINS_ALTERNATING_LR}.
+	 */
+	public int getCOMPinsConfiguration() {
+		return comPins;
+	}
+
+	/**
+	 * Set the hardware configuration of the display's COM pins.
+	 *
+	 * @param comPins The COM pins configuration. Must be one of {@link Constant.COM_PINS_SEQUENTIAL}, {@link Constant.COM_PINS_SEQUENTIAL_LR}, {@link Constant.COM_PINS_ALTERNATING} or {@link Constant.COM_PINS_ALTERNATING_LR}.
+	 */
+	public void setCOMPinsConfiguration(int comPins) {
+		if(comPins == Constant.COM_PINS_SEQUENTIAL || comPins == Constant.COM_PINS_SEQUENTIAL_LR || comPins == Constant.COM_PINS_ALTERNATING || comPins == Constant.COM_PINS_ALTERNATING_LR) {
+			this.comPins = comPins;
+			command(Command.SET_COM_PINS, comPins);
+		}
 	}
 
 	/**

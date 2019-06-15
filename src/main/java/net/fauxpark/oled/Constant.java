@@ -90,11 +90,39 @@ public class Constant {
 	 * Scroll by one pixel every 5 frames.
 	 */
 	public static final int SCROLL_STEP_5           = 0x00;
+
+	/**
+	 * Scroll by one pixel every 64 frames.
+	 */
 	public static final int SCROLL_STEP_64          = 0x01;
+
+	/**
+	 * Scroll by one pixel every 128 frames.
+	 */
 	public static final int SCROLL_STEP_128         = 0x02;
+
+	/**
+	 * Scroll by one pixel every 256 frames.
+	 */
 	public static final int SCROLL_STEP_256         = 0x03;
+
+	/**
+	 * Scroll by one pixel every 3 frames.
+	 */
 	public static final int SCROLL_STEP_3           = 0x04;
+
+	/**
+	 * Scroll by one pixel every 4 frames.
+	 */
 	public static final int SCROLL_STEP_4           = 0x05;
+
+	/**
+	 * Scroll by one pixel every 25 frames.
+	 */
 	public static final int SCROLL_STEP_25          = 0x06;
+
+	/**
+	 * Scroll by one pixel every 2 frames.
+	 */
 	public static final int SCROLL_STEP_2           = 0x07;
 }

@@ -178,7 +178,12 @@ public class Command {
 	public static final int SET_PRECHARGE_PERIOD                 = 0xD9;
 
 	/**
-	 * Set hardware configuration of COM pins.
+	 * Set the hardware configuration of the display's COM pins.
+	 *
+	 * @see Constant.COM_PINS_SEQUENTIAL
+	 * @see Constant.COM_PINS_SEQUENTIAL_LR
+	 * @see Constant.COM_PINS_ALTERNATING
+	 * @see Constant.COM_PINS_ALTERNATING_LR
 	 */
 	public static final int SET_COM_PINS                         = 0xDA;
 
