@@ -1,14 +1,12 @@
 package net.fauxpark.oled.transport;
 
-import java.io.IOException;
-
-import com.pi4j.io.gpio.GpioController;
-import com.pi4j.io.gpio.GpioFactory;
-import com.pi4j.io.gpio.GpioPinDigitalOutput;
-import com.pi4j.io.gpio.Pin;
-import com.pi4j.io.i2c.I2CDevice;
-import com.pi4j.io.i2c.I2CFactory;
-import com.pi4j.io.i2c.I2CFactory.UnsupportedBusNumberException;
+import com.pi4j.Pi4J;
+import com.pi4j.context.Context;
+import com.pi4j.io.gpio.digital.DigitalOutput;
+import com.pi4j.io.i2c.I2C;
+import com.pi4j.library.pigpio.PiGpio;
+import com.pi4j.plugin.pigpio.provider.gpio.digital.PiGpioDigitalOutputProvider;
+import com.pi4j.plugin.pigpio.provider.i2c.PiGpioI2CProvider;
 
 /**
  * A {@link Transport} implementation that utilises I<sup>2</sup>C.
@@ -22,19 +20,19 @@ public class I2CTransport implements Transport {
 	private static final int DC_BIT = 6;
 
 	/**
-	 * The internal GPIO instance.
+	 * The internal Pi4J context.
 	 */
-	private GpioController gpio;
+	private final Context context;
 
 	/**
 	 * The GPIO pin corresponding to the RST line on the display.
 	 */
-	private GpioPinDigitalOutput rstPin;
+	private final DigitalOutput rstPin;
 
 	/**
 	 * The internal I<sup>2</sup>C device.
 	 */
-	private I2CDevice i2c;
+	private final I2C i2c;
 
 	/**
 	 * I2CTransport constructor.
@@ -43,25 +41,36 @@ public class I2CTransport implements Transport {
 	 * @param bus The I<sup>2</sup>C bus to use.
 	 * @param address The I<sup>2</sup>C address of the display.
 	 */
-	public I2CTransport(Pin rstPin, int bus, int address) {
-		gpio = GpioFactory.getInstance();
-		this.rstPin = gpio.provisionDigitalOutputPin(rstPin);
+	public I2CTransport(int rstPin, int bus, int address) {
+		var gpio = PiGpio.newNativeInstance();
+		this.context = Pi4J.newContextBuilder()
+			.noAutoDetectProviders()
+			.add(
+				PiGpioI2CProvider.newInstance(gpio),
+				PiGpioDigitalOutputProvider.newInstance(gpio)
+			)
+			.build();
 
-		try {
-			i2c = I2CFactory.getInstance(bus).getDevice(address);
-		} catch(IOException | UnsupportedBusNumberException e) {
-			e.printStackTrace();
-		}
+		var rstPinConfig = DigitalOutput.newConfigBuilder(context)
+				.address(rstPin)
+				.build();
+		this.rstPin = context.dout().create(rstPinConfig);
+
+		var i2cConfig = I2C.newConfigBuilder(context)
+			.bus(bus)
+			.device(address)
+			.build();
+		this.i2c = context.i2c().create(i2cConfig);
 	}
 
 	@Override
 	public void reset() {
 		try {
-			rstPin.setState(true);
+			rstPin.high();
 			Thread.sleep(1);
-			rstPin.setState(false);
+			rstPin.low();
 			Thread.sleep(10);
-			rstPin.setState(true);
+			rstPin.high();
 		} catch(InterruptedException e) {
 			e.printStackTrace();
 		}
@@ -69,7 +78,7 @@ public class I2CTransport implements Transport {
 
 	@Override
 	public void shutdown() {
-		gpio.shutdown();
+		context.shutdown();
 	}
 
 	@Override
@@ -82,11 +91,7 @@ public class I2CTransport implements Transport {
 			commandBytes[i + 2] = (byte) params[i];
 		}
 
-		try {
-			i2c.write(commandBytes);
-		} catch(IOException e) {
-			e.printStackTrace();
-		}
+		i2c.write(commandBytes);
 	}
 
 	@Override
@@ -94,14 +99,7 @@ public class I2CTransport implements Transport {
 		byte[] dataBytes = new byte[data.length + 1];
 		dataBytes[0] = (byte) (1 << DC_BIT);
 
-		for(int i = 0; i < data.length; i++) {
-			dataBytes[i + 1] = data[i];
-		}
-
-		try {
-			i2c.write(dataBytes);
-		} catch(IOException e) {
-			e.printStackTrace();
-		}
+		System.arraycopy(data, 0, dataBytes, 1, data.length);
+		i2c.write(dataBytes);
 	}
 }

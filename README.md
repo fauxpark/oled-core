@@ -1,35 +1,45 @@
 # oled-core: SSD1306 in Java
 
-This is a driver for the [Adafruit SSD1306 OLED display](https://www.adafruit.com/categories/98) on the Raspberry Pi, written (almost) completely in Java.
+This is a driver for the [Adafruit SSD1306 OLED display](https://www.adafruit.com/categories/98) on the Raspberry Pi.
 It makes use of the [Pi4J](https://github.com/Pi4J/pi4j) library, which does all the fiddly bits in native code to operate the GPIO pins and drive the SPI and I<sup>2</sup>C interfaces.
 
 The aim of this project is to abstract away the low-level aspects of the SSD1306 and focus on manipulating the contents of the screen through a very simple API.
 
-## GPIO Pinout
+## Prerequisites
+
+Firstly, enable the I<sup>2</sup>C and/or SPI peripherals in `raspi-config`.
+
+Then, install PiGpio and Java. On Raspbian:
+
+```
+$ sudo apt install pigpio default-jre-headless
+```
+
+Note that any applications built with this library must be run with `sudo`, due to its use of PiGpio.
+
+### GPIO Pinout
 
 The pinout for the Raspberry Pi GPIO header is as follows:
 
-| Display Pin  | Physical Pin (SPI)      | Physical Pin (I<sup>2</sup>C)  |
-| ------------:|:----------------------- |:------------------------------ |
-| Ground       | 6                       | 6                              |
-| Voltage In   | 1                       | 1                              |
-| 3v3          | N/C                     | N/C                            |
-| Chip Select  | 24 (`CS0`) / 26 (`CS1`) | N/C                            |
-| Reset        | 8 (`GPIO_15`) / Any     | 8 (`GPIO_15`) / Any            |
-| Data/Command | 10 (`GPIO_16`) / Any    | N/C (`0x3D`) / Ground (`0x3C`) |
-| Clock        | 23                      | 5                              |
-| Data         | 19                      | 3                              |
+|  Display Pin | Physical Pin (SPI)      | Physical Pin (I<sup>2</sup>C)  |
+|-------------:|:------------------------|:-------------------------------|
+|       Ground | 6                       | 6                              |
+|   Voltage In | 1                       | 1                              |
+|          3v3 | N/C                     | N/C                            |
+|  Chip Select | 24 (`CS0`) / 26 (`CS1`) | N/C                            |
+|        Reset | 8 (GPIO 14) / Any       | 8 (GPIO 14) / Any              |
+| Data/Command | 10 (GPIO 15) / Any      | N/C (`0x3D`) / Ground (`0x3C`) |
+|        Clock | 23 (GPIO 11)            | 5 (GPIO 3)                     |
+|         Data | 19 (GPIO 10)            | 3 (GPIO 2)                     |
 
 ## Getting Started
-
-First, you may need to install WiringPi, as Pi4J depends on it. On Raspbian, you should be able to install it using `sudo apt-get install wiringpi`.
 
 To set up the display, simply create a new `Transport` object, and pass it to an `SSD1306` object, like so:
 
 ```java
-Transport transport = new I2CTransport(RaspiPin.GPIO_15, I2CBus.BUS_1, 0x3D);
+Transport transport = new I2CTransport(14, 1, 0x3D);
 // Or:
-Transport transport = new SPITransport(SpiChannel.CS0, RaspiPin.GPIO_15, RaspiPin.GPIO_16);
+Transport transport = new SPITransport(0, 14, 15);
 
 SSD1306 ssd1306 = new SSD1306(128, 64, transport);
 
@@ -60,7 +70,7 @@ You can also do some basic line & shape drawing using the `Graphics` class.
 Just call the `getGraphics()` method on the SSD1306 instance:
 
 ```java
-Transport transport = new SPITransport(SpiChannel.CS0, RaspiPin.GPIO_15, RaspiPin.GPIO_16);
+Transport transport = new SPITransport(0, 14, 15);
 SSD1306 ssd1306 = new SSD1306(128, 64, transport);
 Graphics graphics = ssd1306.getGraphics();
 

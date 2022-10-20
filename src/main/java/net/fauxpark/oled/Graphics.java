@@ -2,7 +2,6 @@ package net.fauxpark.oled;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
-import java.io.IOException;
 import java.nio.charset.Charset;
 
 import net.fauxpark.oled.font.Font;
@@ -16,7 +15,7 @@ public class Graphics {
 	/**
 	 * The SSD1306 OLED display.
 	 */
-	private SSD1306 ssd1306;
+	private final SSD1306 ssd1306;
 
 	/**
 	 * Graphics constructor.
@@ -68,7 +67,7 @@ public class Graphics {
 	 * @param width The width to resize the image to.
 	 * @param height The height to resize the image to.
 	 */
-	public void image(BufferedImage image, int x, int y, int width, int height) throws IOException {
+	public void image(BufferedImage image, int x, int y, int width, int height) {
 		BufferedImage mono = new BufferedImage(width, height, BufferedImage.TYPE_BYTE_BINARY);
 		mono.createGraphics().drawImage(image, 0, 0, width, height, null);
 		Raster r = mono.getRaster();

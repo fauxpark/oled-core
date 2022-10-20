@@ -1,14 +1,12 @@
 package net.fauxpark.oled.transport;
 
-import java.io.IOException;
-
-import com.pi4j.io.gpio.GpioController;
-import com.pi4j.io.gpio.GpioFactory;
-import com.pi4j.io.gpio.GpioPinDigitalOutput;
-import com.pi4j.io.gpio.Pin;
-import com.pi4j.io.spi.SpiChannel;
-import com.pi4j.io.spi.SpiDevice;
-import com.pi4j.io.spi.SpiFactory;
+import com.pi4j.Pi4J;
+import com.pi4j.context.Context;
+import com.pi4j.io.gpio.digital.DigitalOutput;
+import com.pi4j.io.spi.Spi;
+import com.pi4j.library.pigpio.PiGpio;
+import com.pi4j.plugin.pigpio.provider.gpio.digital.PiGpioDigitalOutputProvider;
+import com.pi4j.plugin.pigpio.provider.spi.PiGpioSpiProvider;
 
 /**
  * A {@link Transport} implementation that utilises SPI.
@@ -17,24 +15,24 @@ import com.pi4j.io.spi.SpiFactory;
  */
 public class SPITransport implements Transport {
 	/**
-	 * The internal GPIO instance.
+	 * The internal Pi4J context.
 	 */
-	private GpioController gpio;
+	private final Context context;
 
 	/**
 	 * The GPIO pin corresponding to the RST line on the display.
 	 */
-	private GpioPinDigitalOutput rstPin;
+	private final DigitalOutput rstPin;
 
 	/**
 	 * The GPIO pin corresponding to the D/C line on the display.
 	 */
-	private GpioPinDigitalOutput dcPin;
+	private final DigitalOutput dcPin;
 
 	/**
 	 * The internal SPI device.
 	 */
-	private SpiDevice spi;
+	private final Spi spi;
 
 	/**
 	 * SPITransport constructor.
@@ -43,26 +41,41 @@ public class SPITransport implements Transport {
 	 * @param rstPin The GPIO pin to use for the RST line.
 	 * @param dcPin The GPIO pin to use for the D/C line.
 	 */
-	public SPITransport(SpiChannel channel, Pin rstPin, Pin dcPin) {
-		gpio = GpioFactory.getInstance();
-		this.rstPin = gpio.provisionDigitalOutputPin(rstPin);
-		this.dcPin = gpio.provisionDigitalOutputPin(dcPin);
+	public SPITransport(int channel, int rstPin, int dcPin) {
+		var gpio = PiGpio.newNativeInstance();
+		this.context = Pi4J.newContextBuilder()
+			.noAutoDetect()
+			.add(
+				PiGpioSpiProvider.newInstance(gpio),
+				PiGpioDigitalOutputProvider.newInstance(gpio)
+			)
+			.build();
 
-		try {
-			spi = SpiFactory.getInstance(channel, 8000000);
-		} catch(IOException e) {
-			e.printStackTrace();
-		}
+		var rstPinConfig = DigitalOutput.newConfigBuilder(context)
+				.address(rstPin)
+				.build();
+		this.rstPin = context.dout().create(rstPinConfig);
+
+		var dcPinConfig = DigitalOutput.newConfigBuilder(context)
+				.address(dcPin)
+				.build();
+		this.dcPin = context.dout().create(dcPinConfig);
+
+		var spiConfig = Spi.newConfigBuilder(context)
+			.address(channel)
+			.baud(8000000)
+			.build();
+		this.spi = context.spi().create(spiConfig);
 	}
 
 	@Override
 	public void reset() {
 		try {
-			rstPin.setState(true);
+			rstPin.high();
 			Thread.sleep(1);
-			rstPin.setState(false);
+			rstPin.low();
 			Thread.sleep(10);
-			rstPin.setState(true);
+			rstPin.high();
 		} catch(InterruptedException e) {
 			e.printStackTrace();
 		}
@@ -70,36 +83,21 @@ public class SPITransport implements Transport {
 
 	@Override
 	public void shutdown() {
-		gpio.shutdown();
+		context.shutdown();
 	}
 
 	@Override
 	public void command(int command, int... params) {
-		dcPin.setState(false);
-
-		try {
-			spi.write((byte) command);
-		} catch(IOException e) {
-			e.printStackTrace();
-		}
-
+		dcPin.low();
+		spi.write((byte) command);
 		for(int param : params) {
-			try {
-				spi.write((byte) param);
-			} catch(IOException e) {
-				e.printStackTrace();
-			}
+			spi.write((byte) param);
 		}
 	}
 
 	@Override
 	public void data(byte[] data) {
-		dcPin.setState(true);
-
-		try {
-			spi.write(data);
-		} catch(IOException e) {
-			e.printStackTrace();
-		}
+		dcPin.high();
+		spi.write(data);
 	}
 }

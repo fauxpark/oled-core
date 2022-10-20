@@ -16,22 +16,22 @@ public class SSD1306 {
 	/**
 	 * The transport to use.
 	 */
-	private Transport transport;
+	private final Transport transport;
 
 	/**
 	 * The width of the display in pixels.
 	 */
-	private int width;
+	private final int width;
 
 	/**
 	 * The height of the display in pixels.
 	 */
-	private int height;
+	private final int height;
 
 	/**
 	 * The number of pages in the display.
 	 */
-	private int pages;
+	private final int pages;
 
 	/**
 	 * The display buffer.
@@ -186,7 +186,7 @@ public class SSD1306 {
 	/**
 	 * Clear the buffer.
 	 * <br/>
-	 * NOTE: This does not clear the display, you must manually call {@link#display()}.
+	 * NOTE: This does not clear the display, you must manually call {@link #display()}.
 	 */
 	public void clear() {
 		buffer = new byte[width * pages];
@@ -267,7 +267,7 @@ public class SSD1306 {
 	/**
 	 * Get the memory addressing mode.
 	 *
-	 * @return The current memory mode, either {@link Constant.MEMORY_MODE_HORIZONTAL}, {@link Constant.MEMORY_MODE_VERTICAL}, or {@link Constant.MEMORY_MODE_PAGE}.
+	 * @return The current memory mode, either {@link Constant#MEMORY_MODE_HORIZONTAL}, {@link Constant#MEMORY_MODE_VERTICAL}, or {@link Constant#MEMORY_MODE_PAGE}.
 	 */
 	public int getMemoryMode() {
 		return memoryMode;
@@ -276,7 +276,7 @@ public class SSD1306 {
 	/**
 	 * Set the memory addressing mode.
 	 *
-	 * @param memoryMode The memory mode to set. Must be one of {@link Constant.MEMORY_MODE_HORIZONTAL}, {@link Constant.MEMORY_MODE_VERTICAL}, or {@link Constant.MEMORY_MODE_PAGE}.
+	 * @param memoryMode The memory mode to set. Must be one of {@link Constant#MEMORY_MODE_HORIZONTAL}, {@link Constant#MEMORY_MODE_VERTICAL}, or {@link Constant#MEMORY_MODE_PAGE}.
 	 */
 	public void setMemoryMode(int memoryMode) {
 		if(memoryMode == Constant.MEMORY_MODE_HORIZONTAL || memoryMode == Constant.MEMORY_MODE_VERTICAL || memoryMode == Constant.MEMORY_MODE_PAGE) {
@@ -520,7 +520,7 @@ public class SSD1306 {
 	/**
 	 * Get hardware configuration of the display's COM pins.
 	 *
-	 * @return The COM pins configuration, one of {@link Constant.COM_PINS_SEQUENTIAL}, {@link Constant.COM_PINS_SEQUENTIAL_LR}, {@link Constant.COM_PINS_ALTERNATING} or {@link Constant.COM_PINS_ALTERNATING_LR}.
+	 * @return The COM pins configuration, one of {@link Constant#COM_PINS_SEQUENTIAL}, {@link Constant#COM_PINS_SEQUENTIAL_LR}, {@link Constant#COM_PINS_ALTERNATING} or {@link Constant#COM_PINS_ALTERNATING_LR}.
 	 */
 	public int getCOMPinsConfiguration() {
 		return comPins;
@@ -529,7 +529,7 @@ public class SSD1306 {
 	/**
 	 * Set the hardware configuration of the display's COM pins.
 	 *
-	 * @param comPins The COM pins configuration. Must be one of {@link Constant.COM_PINS_SEQUENTIAL}, {@link Constant.COM_PINS_SEQUENTIAL_LR}, {@link Constant.COM_PINS_ALTERNATING} or {@link Constant.COM_PINS_ALTERNATING_LR}.
+	 * @param comPins The COM pins configuration. Must be one of {@link Constant#COM_PINS_SEQUENTIAL}, {@link Constant#COM_PINS_SEQUENTIAL_LR}, {@link Constant#COM_PINS_ALTERNATING} or {@link Constant#COM_PINS_ALTERNATING_LR}.
 	 */
 	public void setCOMPinsConfiguration(int comPins) {
 		if(comPins == Constant.COM_PINS_SEQUENTIAL || comPins == Constant.COM_PINS_SEQUENTIAL_LR || comPins == Constant.COM_PINS_ALTERNATING || comPins == Constant.COM_PINS_ALTERNATING_LR) {

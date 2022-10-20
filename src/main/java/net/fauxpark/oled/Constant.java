@@ -49,25 +49,25 @@ public class Constant {
 
 	/**
 	 * Sequential COM pin hardware configuration.
-	 * With {@link Command.SET_COM_SCAN_INC} issued, rows 0 - 63 on the display correspond to COM0 - COM63.
+	 * With {@link Command#SET_COM_SCAN_INC} issued, rows 0 - 63 on the display correspond to COM0 - COM63.
 	 */
 	public static final int COM_PINS_SEQUENTIAL     = 0x02;
 
 	/**
 	 * Sequential COM pin hardware configuration with left/right remap.
-	 * With {@link Command.SET_COM_SCAN_INC} issued, rows 0 - 31 on the display correspond to COM32 - COM63, and rows 32 - 63 correspond to COM0 - COM31.
+	 * With {@link Command#SET_COM_SCAN_INC} issued, rows 0 - 31 on the display correspond to COM32 - COM63, and rows 32 - 63 correspond to COM0 - COM31.
 	 */
 	public static final int COM_PINS_SEQUENTIAL_LR  = 0x22;
 
 	/**
 	 * Alternating COM pin hardware configuration.
-	 * With {@link Command.SET_COM_SCAN_INC} issued, row 0 on the display corresponds to COM0, row 1 to COM32, row 2 to COM2, row 3 to COM33, etc.
+	 * With {@link Command#SET_COM_SCAN_INC} issued, row 0 on the display corresponds to COM0, row 1 to COM32, row 2 to COM2, row 3 to COM33, etc.
 	 */
 	public static final int COM_PINS_ALTERNATING    = 0x12;
 
 	/**
 	 * Alternating COM pin hardware configuration with left/right remap.
-	 * With {@link Command.SET_COM_SCAN_INC} issued, row 0 on the display corresponds to COM32, row 1 to COM0, row 2 to COM33, row 3 to COM1, etc.
+	 * With {@link Command#SET_COM_SCAN_INC} issued, row 0 on the display corresponds to COM32, row 1 to COM0, row 2 to COM33, row 3 to COM1, etc.
 	 */
 	public static final int COM_PINS_ALTERNATING_LR = 0x32;
 
