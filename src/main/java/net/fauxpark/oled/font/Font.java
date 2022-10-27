@@ -10,31 +10,31 @@ package net.fauxpark.oled.font;
  * @author fauxpark
  */
 public interface Font {
-	/**
-	 * Get the name of the font's character set.
-	 *
-	 * @return The font's character set name.
-	 */
-	String getName();
+    /**
+     * Get the name of the font's character set.
+     *
+     * @return The font's character set name.
+     */
+    String getName();
 
-	/**
-	 * Get the number of columns in the font.
-	 *
-	 * @return The font's column count.
-	 */
-	int getColumns();
+    /**
+     * Get the number of columns in the font.
+     *
+     * @return The font's column count.
+     */
+    int getColumns();
 
-	/**
-	 * Get the number of rows in the font.
-	 *
-	 * @return The font's row count.
-	 */
-	int getRows();
+    /**
+     * Get the number of rows in the font.
+     *
+     * @return The font's row count.
+     */
+    int getRows();
 
-	/**
-	 * Get the glyph data for the font.
-	 *
-	 * @return An array of ints representing the columns for each glyph.
-	 */
-	int[] getGlyphs();
+    /**
+     * Get the glyph data for the font.
+     *
+     * @return An array of ints representing the columns for each glyph.
+     */
+    int[] getGlyphs();
 }

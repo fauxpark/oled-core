@@ -1,41 +1,41 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<name>OLED Core</name>
-	<description>SSD1306 Driver Core</description>
-	<groupId>net.fauxpark</groupId>
-	<artifactId>oled-core</artifactId>
-	<version>3.0</version>
-	<modelVersion>4.0.0</modelVersion>
-	<url>https://github.com/fauxpark/oled-core</url>
-	<packaging>jar</packaging>
-	<licenses>
-		<license>
-			<name>MIT License</name>
-			<url>http://www.opensource.org/licenses/mit-license.php</url>
-			<distribution>repo</distribution>
-		</license>
-	</licenses>
-	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<pi4j.version>2.2.0</pi4j.version>
-		<maven.compiler.source>11</maven.compiler.source>
-		<maven.compiler.target>11</maven.compiler.target>
-	</properties>
-	<dependencies>
-		<dependency>
-			<groupId>com.pi4j</groupId>
-			<artifactId>pi4j-core</artifactId>
-			<version>${pi4j.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.pi4j</groupId>
-			<artifactId>pi4j-plugin-raspberrypi</artifactId>
-			<version>${pi4j.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.pi4j</groupId>
-			<artifactId>pi4j-plugin-pigpio</artifactId>
-			<version>${pi4j.version}</version>
-		</dependency>
-	</dependencies>
+    <name>OLED Core</name>
+    <description>SSD1306 Driver Core</description>
+    <groupId>net.fauxpark</groupId>
+    <artifactId>oled-core</artifactId>
+    <version>3.0</version>
+    <modelVersion>4.0.0</modelVersion>
+    <url>https://github.com/fauxpark/oled-core</url>
+    <packaging>jar</packaging>
+    <licenses>
+        <license>
+            <name>MIT License</name>
+            <url>http://www.opensource.org/licenses/mit-license.php</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <pi4j.version>2.2.0</pi4j.version>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+    </properties>
+    <dependencies>
+        <dependency>
+            <groupId>com.pi4j</groupId>
+            <artifactId>pi4j-core</artifactId>
+            <version>${pi4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.pi4j</groupId>
+            <artifactId>pi4j-plugin-raspberrypi</artifactId>
+            <version>${pi4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.pi4j</groupId>
+            <artifactId>pi4j-plugin-pigpio</artifactId>
+            <version>${pi4j.version}</version>
+        </dependency>
+    </dependencies>
 </project>

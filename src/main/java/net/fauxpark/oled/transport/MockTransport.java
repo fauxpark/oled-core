@@ -5,15 +5,15 @@ package net.fauxpark.oled.transport;
  * @author fauxpark
  */
 public class MockTransport implements Transport {
-	@Override
-	public void reset() {}
+    @Override
+    public void reset() {}
 
-	@Override
-	public void shutdown() {}
+    @Override
+    public void shutdown() {}
 
-	@Override
-	public void command(int command, int... params) {}
+    @Override
+    public void command(int command, int... params) {}
 
-	@Override
-	public void data(byte[] data) {}
+    @Override
+    public void data(byte[] data) {}
 }
