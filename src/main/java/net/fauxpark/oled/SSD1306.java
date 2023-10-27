@@ -576,9 +576,9 @@ public class SSD1306 {
         }
 
         if(on) {
-            buffer[x + (y / 8) * width] |= (1 << (y & 7));
+            buffer[x + (y / 8) * width] |= (byte) (1 << (y & 7));
         } else {
-            buffer[x + (y / 8) * width] &= ~(1 << (y & 7));
+            buffer[x + (y / 8) * width] &= (byte) ~(1 << (y & 7));
         }
 
         return true;
